@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js --ignore *.json"
+    "start": "nodemon index.js --ignore *.json",
+    "dev": "nodemon index.js --ignore *.json",
+    "pdf": "nodemon pdf.js --ignore *.json"
   },
   "nodemonConfig": {
     "ignore": [
@@ -21,6 +23,7 @@
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
     "express": "^4.18.1",
+    "node-downloader-helper": "^2.1.1",
     "puppeteer": "^15.5.0"
   }
 }
