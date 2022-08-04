@@ -1,6 +1,5 @@
 const fs = require('fs');
 const pageScraper = require('./pageScraper');
-const pdfScraper = require('./pdfScraper');
 const colors = require('colors');
 
 async function scrapeAll(browserInstance){
