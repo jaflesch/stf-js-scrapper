@@ -9,7 +9,12 @@ async function scrapeAll(browserInstance){
 		const scrapedData  = await pageScraper.scraper(browser);	
 		await browser.close();
 		
-		fs.writeFile("json/data.json", JSON.stringify(scrapedData), 'utf8', function(err) {
+		const dir = '.json/';
+		if (! fs.existsSync(dir)) {
+			fs.mkdirSync(dir);
+		}
+		
+		fs.writeFile(`${dir}/data.json`, JSON.stringify(scrapedData), 'utf8', function(err) {
 			if(err) {
 				return console.log(err);
 			}
