@@ -1,11 +1,25 @@
+import { CLIArgs } from "./args";
+
 const fs = require('fs');
 
-export class FileController {
-	constructor(
-		private readonly rawData: any[]
-	){}
+type FileOptions = {
+	minify?: CLIArgs['minify'];
+	paginate?: CLIArgs['paginate'];
+}
 
-	async save (paginated?: boolean, minified?: boolean)  {
+export class FileController {
+	private minified = false;
+	private paginated = true;
+
+	constructor(
+		private readonly rawData: any[],
+		private readonly _options?: FileOptions
+	){
+		this.minified = !!(_options?.minify);
+		this.paginated = !!(_options?.paginate);
+	}
+
+	async save ()  {
 		try {
 			const dir = './json/';
 			if (! fs.existsSync(dir)) {
@@ -21,29 +35,43 @@ export class FileController {
 				- sizes...
 			*/
 			
-			// Paginated json
-			// for (let i = 0; i < scrapedData.length; i++) {
-			// 	const folderPath = `${dir}/${i + 1}`;
-			// 	if (! fs.existsSync(folderPath)) {
-			// 		fs.mkdirSync(folderPath);
-			// 	}
-				
-			// 	const now = new Date();			
-			// 	const fileName = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
-			// 	fs.writeFile(`${folderPath}/${fileName}.json`, JSON.stringify(scrapedData[i].data), 'utf8', function(err) {
-			// 		if(err) {
-			// 			return console.log(err);
-			// 		}
-			// 		console.log("The data has been scrapped and saved successfully! View it at './json/'".green);
-			// 	});
-			// }
-			
-			fs.writeFile(`${dir}/data.json`, JSON.stringify(this.rawData), 'utf8', function(err: Error) {
-				if(err) {
-					return console.log(err);
+			if (this.paginated) {
+				for (let i = 0; i < this.rawData.length; i++) {
+					const folderPath = `${dir}/${i + 1}`;
+					if (! fs.existsSync(folderPath)) {
+						fs.mkdirSync(folderPath);
+					}
+
+					const now = new Date();			
+					const fileName = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
+
+					fs.writeFile(
+						`${folderPath}/${fileName}.json`, 
+						JSON.stringify(this.rawData[i].data, undefined, this.minified ? undefined : 2), 
+						'utf8', 
+						function(err: Error) {
+							if(err) {
+								return console.log(err);
+							}
+							console.log("The data has been scrapped and saved successfully! View it at './json/'".green);
+						}
+					);
 				}
-				console.log("The data has been scrapped and saved successfully! View it at './json/data.json'".green);
-			});
+			} else {
+				fs.writeFile(
+					`${dir}/data.json`, 
+					JSON.stringify(this.rawData, undefined, this.minified ? undefined : 2),
+					'utf8', 
+					function(err: Error) {
+						if(err) {
+							return console.log(err);
+						}
+						console.log("The data has been scrapped and saved successfully! View it at './json/data.json'".green);
+					}
+				);
+			}
+			
+			
 			
 		} catch (err) {
 			console.error(`Error on saving data: ${err}`.red);

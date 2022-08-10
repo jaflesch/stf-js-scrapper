@@ -9,6 +9,7 @@ export type CLIArgs = {
 	a: boolean;
 	s: string;
 	m: boolean;
+	p: boolean;
 	limit: number;
 	offset: number;
 	rows: number;
@@ -16,6 +17,7 @@ export type CLIArgs = {
 	async: boolean;
 	sort: string;
 	minify: boolean;
+	paginate: boolean;
 }
 
 export const args = yargs(process.argv.slice(2))
@@ -68,6 +70,15 @@ export const args = yargs(process.argv.slice(2))
 			default: false,
 			describe: colors.blue('Minifica JSON(s) gerado'),
 			type: 'boolean'
-		}
+		},
+		'p': {
+			alias: 'paginate',
+			demandOption: false,
+			default: true,
+			describe: colors.blue('Salva cada página em um JSON'),
+			type: 'boolean'
+		},
+		
+
 	})
 	.argv;
