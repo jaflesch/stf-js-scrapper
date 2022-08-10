@@ -19,18 +19,24 @@ const getPdfPageURL = async (browser: any, page: any, elementHandle: any) => {
 	return await getOpenedWindowUrl(browser, pageTarget);
 }
 
-const normalizeString = (string: string) => {
+const normalizeString = (string: string): string => {
 	return string.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
-const getDocIdFromURL = (url: string) => {
+const getDocIdFromURL = (url: string): string => {
 	// https://jurisprudencia.stf.jus.br/pages/search/<docId>/false
 	return url?.split('/search/')[1]?.split('/')[0];
+}
+
+const getDocIdFromPdfUrl = (url: string): string | null  => {
+	const params = new URLSearchParams(url);
+	return params.get('docID');
 }
 
 export const utils = {
 	getPdfPageURL,
 	getDocIdFromURL,
 	normalizeString,
+	getDocIdFromPdfUrl,
 	getOpenedWindowUrl,
 }

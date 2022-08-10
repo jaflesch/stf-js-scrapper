@@ -1,7 +1,31 @@
-import colors from 'colors';
+const colors = require('colors');
 import { Browser, ElementHandle, Page } from 'puppeteer';
 import { CLIArgs } from './args';
 import { utils } from './utils';
+
+export type Judgment = {
+	id: string;
+	titulo: string;
+	orgao: string;
+	relator: string;
+	redator?: string | undefined; 
+	dataJulgamento: string; 
+	dataPublicacao: string,
+	ocorrencias: Array<
+		{[x: string]: string
+	}>;
+	dadosCompletos: string;
+	innerHTML: string | undefined;
+	pdfFileUrl: string | null;
+	docId: string | null;
+	innerPage: {
+		dje: string;
+		titulo: string;
+		subtitulo: string;
+		publicacao: string;
+		innerHTML: string | undefined;
+	}
+}
 
 export class PageScraper {
 	private offset: number;
@@ -24,8 +48,7 @@ export class PageScraper {
 		this.rowsPerPage = _options.rows;
 		this.debug = _options.debug;
 		this.isAsync = _options.async;
-		this.mainFrameDOM = '.result-container.jud-text.p-15.ng-star-inserted';
-
+		
 		const { order, orderBy } = this.parseSort(_options.s);
 		this.order = order;
 		this.orderBy = orderBy;
@@ -98,10 +121,11 @@ export class PageScraper {
 	private async scrapCurrentPage (page: Page, row: number) {
 		this.debug && console.warn(`Scraping data from page [${row}]'...`.blue);
 
-		let pageData = await page.$$eval(this.mainFrameDOM, async (sections: any) => {
-			return sections.map((section: any) => {
+		let pageData: Judgment[] = await page.$$eval(this.mainFrameDOM, async (sections: Element[]) => {
+			return sections.map((section) => {
 				const { id } = section;
 				const sectionDOM = `.result-container.jud-text.p-15.ng-star-inserted#${id}`;
+				const innerHTML = document.querySelector(sectionDOM)?.innerHTML;
 
 				// Título
 				const link = document.querySelector(`${sectionDOM} > a`) as HTMLAnchorElement;
@@ -114,15 +138,15 @@ export class PageScraper {
 				
 				const orgao = headerInfo[0]?.split(': ')[1];
 				const relator = headerInfo[1]?.split(': ')[1];
-				let redator, julgamento, publicacao;
+				let redator, dataJulgamento, dataPublicacao;
 
 				if (headerInfo.length > 4) {
 					redator = headerInfo[2]?.split(': ')[1];
-					julgamento = headerInfo[3]?.split(': ')[1];
-					publicacao = headerInfo[4]?.split(': ')[1];
+					dataJulgamento = headerInfo[3]?.split(': ')[1];
+					dataPublicacao = headerInfo[4]?.split(': ')[1];
 				} else {
-					julgamento = headerInfo[2]?.split(': ')[1];
-					publicacao = headerInfo[3]?.split(': ')[1];
+					dataJulgamento = headerInfo[2]?.split(': ')[1];
+					dataPublicacao = headerInfo[3]?.split(': ')[1];
 				}
 				
 				// Ocorrências
@@ -132,34 +156,43 @@ export class PageScraper {
 					const key = (occurrences[j].children[0] as HTMLDivElement).innerText;
 					const value = (occurrences[j].children[1] as HTMLDivElement).innerText;
 					const normalizedKey = key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
-					
 					ocorrencias.push({
 						[normalizedKey]: value
 					});
 				}
-
+				
 				return {
 					id: dadosCompletos.split('/search/')[1]?.split('/')[0],
 					titulo,
 					orgao,
 					relator,
 					redator, 
-					julgamento, 
-					publicacao,
+					dataJulgamento, 
+					dataPublicacao,
 					ocorrencias,
 					dadosCompletos,
+					innerHTML,
+					pdfFileUrl: '',
+					docId: null,
+					innerPage: {
+						dje: '',
+						titulo: '',
+						subtitulo: '',
+						publicacao: '',
+						innerHTML: '',
+					}
 				}
 			});
 		});
 		
 		// Obter link do PDF:
 		for (let i = 0; i < pageData.length; i++) {
-			this.debug && console.log(`\n[${`${i}] Navigating to`.yellow}: ${pageData[i].dadosCompletos}`);				
+			this.debug && console.log(`\n[${row}:${`${i + 1}] Navigating to`.yellow}: ${pageData[i].dadosCompletos}`);				
 			
 			await page.goto(pageData[i].dadosCompletos);
 			await page.waitForSelector('.header-icons.hide-in-print mat-icon');	
 			
-			const pdfIconHandler = await page.evaluateHandle(async () => {
+			const iconHandler = await page.evaluateHandle(async () => {
 				const nodes = document.querySelectorAll('.header-icons.hide-in-print mat-icon');					
 				for(let j = 0; j < nodes.length; j++) {
 					if ((nodes[j] as HTMLDivElement).innerText === 'picture_as_pdf') {
@@ -168,11 +201,41 @@ export class PageScraper {
 				}
 			});
 
+			const innerPageData = await page.evaluate(async () => {
+				const baseDOM = '.cp-content.display-in-print.ng-star-inserted';
+				const baseHeaderDOM = `${baseDOM} > div > div`;
+				
+				const innerHTML = document.querySelector(baseDOM)?.innerHTML;
+				const titulo = (
+					document.querySelector(`${baseHeaderDOM} > h4:first-child`
+				) as HTMLHeadingElement).innerText;
+
+				const subtitulo = (
+					document.querySelector(`${baseHeaderDOM} > h4:nth-child(2)`
+				) as HTMLHeadingElement).innerText;
+				
+				const publicacaoRaw = (
+					document.querySelector(`${baseDOM} > div:nth-child(3) > div`
+				) as HTMLDivElement).innerText;
+				const [publicacao, diario] = publicacaoRaw.split('\n');			
+				
+				return {			
+					titulo,
+					subtitulo,
+					publicacao,
+					dje: diario.split(' ')[0],
+					innerHTML
+				}
+			});
+
 			this.debug && console.warn('Opening new window with pdf file...'.blue);	
-			const pdfFileUrl = await utils.getPdfPageURL(this.browserInstace, page, pdfIconHandler);
+			const pdfFileUrl = await utils.getPdfPageURL(this.browserInstace, page, iconHandler);			
 			
 			this.debug && console.warn(`${'URL found:'.green} ${pdfFileUrl}`);	
 			pageData[i].pdfFileUrl = pdfFileUrl;
+			pageData[i].innerPage = innerPageData;
+			pageData[i].docId = utils.getDocIdFromPdfUrl(pdfFileUrl);
+
 			await page.goBack();
 		}
 
@@ -189,7 +252,7 @@ export class PageScraper {
 		return response;
 	}
 
-	public getOptions()  {
+	getOptions()  {
 		return this._options;
 	}
 }
