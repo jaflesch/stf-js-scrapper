@@ -18,8 +18,9 @@ export class PageController {
 			}
 			const pageScraper = new PageScraper(browser, args);
 			const scrapedData = await pageScraper.run();	
-			const fileController = new FileController(scrapedData);
+			const fileController = new FileController(scrapedData, args);
 			fileController.save();
+			
 			await browser.close();
 		} 
 		catch (err) {
