@@ -28,7 +28,7 @@ export class FileController {
 		const now = new Date();
 		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 	}
-
+	
 	async save ()  {
 		try {
 			const dir = './json/';
@@ -36,15 +36,6 @@ export class FileController {
 				fs.mkdirSync(dir);
 			}
 
-			/*
-			// to do: save scrap general data
-				- extraction time (start_at, end_at)
-				- extraction params
-				- total files
-				- total pages
-				- sizes...
-			*/
-			
 			if (this.paginated) {
 				let feedback: Feedback = {
 					success: false,
@@ -84,8 +75,8 @@ export class FileController {
 
 				// Config file:
 				const options = this.rawData[0].options;
-				const startAt = this.rawData[0].start;
-				const endAt = this.rawData[this.rawData.length - 1].end;
+				const startAt = this.rawData[0].startAt;
+				const endAt = this.rawData[this.rawData.length - 1].endAt;
 
 				fs.writeFile(
 					`${dir}/config-${this.createFileName()}.json`, 

@@ -1,7 +1,7 @@
 const colors = require('colors');
-import { Browser, ElementHandle, Page } from 'puppeteer';
-import { CLIArgs } from './args';
+import { Browser, Page } from 'puppeteer';
 import { utils } from './utils';
+import { CLIArgs } from './args';
 
 export type Judgment = {
 	id: string;
@@ -27,15 +27,23 @@ export type Judgment = {
 	}
 }
 
+export type ScrapedData = Array<{
+	page: number;
+	data: Judgment[];
+	startAt: number;
+	endAt: number;
+	options: CLIArgs;
+}>
+
 export class PageScraper {
 	private offset: number;
 	private limit: number;
 	private rowsPerPage: number;
 	private debug: boolean;
-	private isAsync: boolean;
-	private url: string;
+	private page: number;
 	private order: string;
 	private orderBy: string;
+	private url = '';
 	private mainFrameDOM = '.result-container.jud-text.p-15.ng-star-inserted';
 
 	constructor (
@@ -43,16 +51,16 @@ export class PageScraper {
 		private readonly _options: CLIArgs
 	) {
 		this.browserInstace = browserInstace;
-		this.offset = _options.offset > 0 ? _options.offset : 1;
+		this.page = _options.offset + 1;
 		this.limit = _options.limit;
+		this.offset = _options.offset;
 		this.rowsPerPage = _options.rows;
 		this.debug = _options.debug;
-		this.isAsync = _options.async;
 		
 		const { order, orderBy } = this.parseSort(_options.s);
 		this.order = order;
 		this.orderBy = orderBy;
-		this.url = this.mountUrl();
+		this.parseURLParams();
 	}
 
 	private parseSort (sortArgString: any) {
@@ -64,23 +72,36 @@ export class PageScraper {
 		}
 	}
 
-	private mountUrl () {
+	private parseURLParams () {
 		let baseUrl = 'https://jurisprudencia.stf.jus.br/pages/search?base=acordaos&sinonimo=true&plural=true&queryString=a';
-		baseUrl += `&page=${this.offset}`;
+		baseUrl += `&page=${this.page}`;
 		baseUrl += `&pageSize=${this.rowsPerPage}`;
 		baseUrl += `&sort=${this.order}`;
 		baseUrl += `&sortBy=${this.orderBy}`;
 
-		return baseUrl;
+		this.url = baseUrl;
+	}
+
+	private getUrl () {
+		return this.url;
+	}
+
+	private nextPage () {
+		this.page++;
+		this.parseURLParams();
+	}
+
+	private previousPage () {
+		this.page = Math.max(1, this.page - 1);
+		this.parseURLParams();
 	}
 
 	private async execute () {
-		let results: any = [];
+		let results: ScrapedData = [];
 		try {
 			this.debug && console.warn(`Starting process`.blue);
 			const page = await this.browserInstace.newPage();
-			await page
-			.goto(this.url);
+			await page.goto(this.url);
 			await page.waitForSelector(this.mainFrameDOM);		
 			this.debug && console.warn('DOM Tree loaded...'.blue);
 	
@@ -95,24 +116,29 @@ export class PageScraper {
 			this.debug && console.warn(`${totalPages} pages to scrap data [${this.offset}-${totalPages}]...`.blue);
 	
 			for(let index = this.offset; index < totalPages; index++) {
+				const startAt = +new Date();
 				await page.waitForTimeout(1000);				
-				results = results.concat(await this.scrapCurrentPage(page, index));
+				const currentPage = await this.scrapCurrentPage(page, index);
+				const endAt = +new Date();
+				
+				results = results.concat({
+					endAt,
+					startAt,
+					page: this.page,
+					data: currentPage,
+					options: this.getOptions(),
+				});
 
-				if (index >= (totalPages)) {
+				if (index < (totalPages)) {
+					this.nextPage();
+					await page.goto(this.getUrl());
 					await page.waitForNavigation();
-					const iconHandler = await page.evaluateHandle(
-						() => document.querySelector('paginator ul .pagination-icon .fa-angle-right')
-					);
-
-					if (iconHandler instanceof ElementHandle<Element>) {
-						await iconHandler.click();
-					}
 				}
 			}
 
 			return results;
 		} catch (err) {
-			this.debug && console.log(`Erro: ${err}`.red);
+			this.debug && console.log(`Error: ${err}`.red);
 			return results;
 		}
 
@@ -239,10 +265,7 @@ export class PageScraper {
 			await page.goBack();
 		}
 
-		return {
-			page: row, 
-			data: pageData,
-		}
+		return pageData;
 	}
 
 	async run() {
