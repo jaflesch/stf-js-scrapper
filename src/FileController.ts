@@ -1,6 +1,7 @@
 const fs = require('fs');
 const colors = require('colors');
 import { CLIArgs } from "./args";
+import { ScrapedData } from "./PageScraper";
 
 type FileOptions = {
 	minify?: CLIArgs['minify'];
@@ -12,12 +13,32 @@ type Feedback = {
 	message: string;
 }
 
+type ConfigOptionsParams = {
+	startAt: Date;
+	endAt: Date;
+	executionTime: number;
+} & CLIArgs;
+
+type ConfigOptionsDTO = {
+	startAt: string;
+	endAt: string;
+	executionTime: string;
+	limit: number;
+	offset: number;
+	rowsPerPage: number;
+	order: string;
+	orderBy: string;
+	minify: boolean;
+	paginate: boolean;
+	debug: boolean;
+}
+
 export class FileController {
 	private minified = false;
 	private paginated = true;
 
 	constructor(
-		private readonly rawData: any[],
+		private readonly rawData: ScrapedData,
 		private readonly _options?: FileOptions
 	) {
 		this.minified = !!(_options?.minify);
@@ -27,6 +48,23 @@ export class FileController {
 	private createFileName () {
 		const now = new Date();
 		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+	}
+
+	private mapOptionsToFile (options: ConfigOptionsParams): ConfigOptionsDTO {
+		const [orderBy, order] = options.sort.split(',');
+		return {
+			startAt: options.startAt.toISOString(),
+			endAt: options.endAt.toISOString(),
+			executionTime: `${options.executionTime}s`,
+			limit: options.limit,
+			offset: options.offset,
+			rowsPerPage: options.rows,
+			order,
+			orderBy,
+			minify: options.minify,
+			paginate: options.paginate,
+			debug: options.debug,
+		}
 	}
 	
 	async save ()  {
@@ -48,6 +86,7 @@ export class FileController {
 						fs.mkdirSync(folderPath);
 					}
 					
+					// Data files
 					fs.writeFile(
 						`${folderPath}/data-${this.createFileName()}.json`, 
 						JSON.stringify(this.rawData[i].data, undefined, this.minified ? undefined : 2), 
@@ -80,12 +119,15 @@ export class FileController {
 
 				fs.writeFile(
 					`${dir}/config-${this.createFileName()}.json`, 
-					JSON.stringify({
-						startAt: new Date(startAt),
-						endAt: new Date(endAt),
-						executionTime: Math.floor((endAt - startAt) / 1000),
-						...options,
-					}, undefined, this.minified ? undefined : 2), 
+					JSON.stringify(
+						this.mapOptionsToFile({
+							startAt: new Date(startAt),
+							endAt: new Date(endAt),
+							executionTime: Math.floor((endAt - startAt) / 1000),
+							...options,
+						}), 
+						undefined, this.minified ? undefined : 2
+					), 
 					'utf8', 
 					(err: Error) => {
 						if(err) {
@@ -101,26 +143,45 @@ export class FileController {
 						}
 					}
 				);
-
 			} else {
+				// Prep config file:
+				const options = this.rawData[0].options;
+				const startAt = this.rawData[0].startAt;
+				const endAt = this.rawData[this.rawData.length - 1].endAt;
 
+				// Data file
 				fs.writeFile(
-					`${dir}/data.json`, 
-					JSON.stringify(this.rawData, undefined, this.minified ? undefined : 2),
+					`${dir}/data-${this.createFileName()}.json`, 
+					JSON.stringify(
+						this.rawData.map((scrapedData) => ({
+							page: scrapedData.page,
+							data: scrapedData.data,
+						})), 
+						undefined, this.minified ? undefined : 2),
 					'utf8', 
-					function(err: Error) {
+					(err: Error) => {
 						if(err) {
 							console.log(`Error when saving file: ${err}`.red);
 							return false;
 						}
-						console.log("The data has been scrapped and saved successfully! View it at './json/data.json'".green);
+						console.log("The data has been scrapped and saved successfully! View it at './json/data-[dd/MM/yyyy].json'".green);
 					}
 				);
+
+				// Config file
 				fs.writeFile(
-					`${dir}/query-params.json`, 
-					JSON.stringify(this.rawData, undefined, this.minified ? undefined : 2),
+					`${dir}/config-unified-${this.createFileName()}.json`, 
+					JSON.stringify(
+						this.mapOptionsToFile({
+							startAt: new Date(startAt),
+							endAt: new Date(endAt),
+							executionTime: Math.floor((endAt - startAt) / 1000),
+							...options,
+						}), 
+						undefined, this.minified ? undefined : 2
+					),
 					'utf8', 
-					function(err: Error) {
+					(err: Error) => {
 						if(err) {
 							console.log(`Error when saving file: ${err}`.red);
 							return false;
@@ -129,9 +190,6 @@ export class FileController {
 					}
 				);
 			}
-			
-			
-			
 		} catch (err) {
 			console.error(`Error on saving data: ${err}`.red);
 		}
