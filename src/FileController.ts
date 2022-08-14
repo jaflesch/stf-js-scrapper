@@ -45,9 +45,11 @@ export class FileController {
 		this.paginated = !!(_options?.paginate);
 	}
 
-	private createFileName () {
+	private createFileName (name: string) {
 		const now = new Date();
-		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+		const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+		
+		return `${name}@${date}`;
 	}
 
 	private mapOptionsToFile (options: ConfigOptionsParams): ConfigOptionsDTO {
@@ -88,7 +90,7 @@ export class FileController {
 					
 					// Data files
 					fs.writeFile(
-						`${folderPath}/data-${this.createFileName()}.json`, 
+						`${folderPath}/${this.createFileName('data')}.json`, 
 						JSON.stringify(this.rawData[i].data, undefined, this.minified ? undefined : 2), 
 						'utf8', 
 						(err: Error) => {
@@ -118,7 +120,7 @@ export class FileController {
 				const endAt = this.rawData[this.rawData.length - 1].endAt;
 
 				fs.writeFile(
-					`${dir}/config-${this.createFileName()}.json`, 
+					`${dir}/${this.createFileName('config')}.json`, 
 					JSON.stringify(
 						this.mapOptionsToFile({
 							startAt: new Date(startAt),
@@ -151,7 +153,7 @@ export class FileController {
 
 				// Data file
 				fs.writeFile(
-					`${dir}/data-${this.createFileName()}.json`, 
+					`${dir}/${this.createFileName('data')}.json`, 
 					JSON.stringify(
 						this.rawData.map((scrapedData) => ({
 							page: scrapedData.page,
@@ -170,7 +172,7 @@ export class FileController {
 
 				// Config file
 				fs.writeFile(
-					`${dir}/config-unified-${this.createFileName()}.json`, 
+					`${dir}/${this.createFileName('config-unified')}.json`, 
 					JSON.stringify(
 						this.mapOptionsToFile({
 							startAt: new Date(startAt),
