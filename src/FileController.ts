@@ -115,12 +115,15 @@ export class FileController {
 				}
 
 				// Config file:
+				const lastIndex = this.rawData.length - 1;
 				const options = this.rawData[0].options;
 				const startAt = this.rawData[0].startAt;
-				const endAt = this.rawData[this.rawData.length - 1].endAt;
+				const endAt = this.rawData[lastIndex].endAt;
+				const firstPage = this.rawData[0].page;
+				const lastPage = this.rawData[lastIndex].page;
 
 				fs.writeFile(
-					`${dir}/${this.createFileName('config')}.json`, 
+					`${dir}/${this.createFileName(`config[${firstPage}-${lastPage}]`)}.json`, 
 					JSON.stringify(
 						this.mapOptionsToFile({
 							startAt: new Date(startAt),
