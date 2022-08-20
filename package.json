@@ -6,7 +6,9 @@
   "scripts": {
     "start": "nodemon index.js --ignore *.json",
     "dev": "nodemon",
-    "pdf": "nodemon pdf.js --ignore *.json"
+    "pdf": "nodemon pdf.js --ignore *.json",
+    "scrap": "ts-node ./src/index.ts --limit=100",
+    "merge": "ts-node ./src/merge.ts"
   },
   "nodemonConfig": {
     "ignore": [
@@ -22,6 +24,8 @@
     "@types/axios": "^0.14.0",
     "@types/colors": "^1.2.1",
     "@types/date-fns": "^2.6.0",
+    "@types/mongodb": "^4.0.7",
+    "@types/mongoose": "^5.11.97",
     "@types/node-downloader-helper": "^1.0.16",
     "@types/puppeteer": "^5.4.6",
     "@types/yargs": "^17.0.11",
@@ -29,7 +33,10 @@
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
     "date-fns": "^2.29.1",
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "mongodb": "^4.9.0",
+    "mongoose": "^6.5.2",
     "node-downloader-helper": "^2.1.1",
     "nodemon": "^2.0.19",
     "puppeteer": "^15.5.0",
