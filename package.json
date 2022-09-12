@@ -8,7 +8,8 @@
     "dev": "nodemon",
     "pdf": "nodemon pdf.js --ignore *.json",
     "scrap": "ts-node ./src/index.ts --limit=100",
-    "merge": "ts-node ./src/merge.ts"
+    "merge": "ts-node ./src/merge.ts",
+    "db": "ts-node ./src/mongo.ts"
   },
   "nodemonConfig": {
     "ignore": [
