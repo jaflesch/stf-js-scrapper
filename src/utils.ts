@@ -14,13 +14,13 @@ async function getOpenedWindowUrl(browser: any, pageTarget: any) {
 const getPdfPageURL = async (browser: any, page: any, elementHandle: any) => {
 	const pageTarget = await page.target();
 	await elementHandle.click();
-	await page.waitForTimeout(1000);
+	await page.waitForTimeout(2000);
 
 	return await getOpenedWindowUrl(browser, pageTarget);
 }
 
 const normalizeString = (string: string): string => {
-	return string.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+	return string.normalize('NFD').trim().replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 const getDocIdFromURL = (url: string): string => {
