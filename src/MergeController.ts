@@ -6,14 +6,16 @@ export class MergeController {
   private folderPath = '';
   private filefolders = '../json';
   private content = null;
+  private paginated = false;
 
   constructor (
-    private readonly paginated: boolean,
-    folderPath?: string
+    folderPath?: string,
+    paginated?: boolean,
   ) {
     if (folderPath) {
       this.filefolders = folderPath;
     }
+    this.paginated = paginated ?? true;
     this.folderPath = path.join(__dirname, this.filefolders);
   }
 
@@ -29,15 +31,18 @@ export class MergeController {
   }
 
   private save (): void {
+    const fileName = path.parse(this.folderPath).base;
+    const filePath = path.join(this.folderPath, `${this.filefolders ? fileName : 'import'}.merge.json`);
+
     fs.writeFile(
-      `${__dirname}/../db/import.json`, 
+      filePath, 
       JSON.stringify(this.content), 
       'utf8', 
       (err: Error) => {
         if(err) {
           console.log(colors.red(`Error when creating merged JSON data: ${err}`));
         } else {
-          console.log(colors.green("The data has been merged and saved successfully! View it at './db/'"));
+          console.log(colors.green(`The data has been merged and saved successfully! View it at '${filePath}'`));
         }
       }
     );
