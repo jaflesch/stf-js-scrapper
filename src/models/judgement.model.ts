@@ -5,8 +5,9 @@ export interface IJudgement {
   titulo: string;
   orgao: string;
   relator: string;
+  relatorPresidente: boolean;
   redator: string;
-  isPresident: boolean;
+  redatorPresidente: boolean;
   dataJulgamento: Date;
   dataPublicacao: Date;
   ementa: string;
@@ -47,13 +48,17 @@ const JudgementSchema = new Schema<IJudgement>({
     type: String,
     required: true,
   },
-  isPresident: {
+  relatorPresidente: {
     type: Boolean,
-    required: true,
+    required: true
   },
   redator: {
     type: String,
     required: true,
+  },
+  redatorPresidente: {
+    type: Boolean,
+    required: true
   },
   dataJulgamento: {
     type: Date,

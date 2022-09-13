@@ -1,5 +1,4 @@
 import * as cherrio from "cheerio";
-import { format, parseISO } from "date-fns";
 import { IJudgement } from "../models/judgement.model";
 import { utils } from '../utils';
 
@@ -22,7 +21,9 @@ export const JSONtoModel = (data: any): IJudgement => {
   const body = $('.jud-text.ng-star-inserted');
   
   let partes: string[] = [];
-  let paginaInternaPublicacao, ementa, decisao, dje, tese, tema, doutrina, legislacao, observacao, similares;
+  let paginaInternaPublicacao = '';
+  let ementa = '', decisao = '', dje = '', tese = '', tema = ''; 
+  let doutrina = '', legislacao = '', observacao = '', similares = '';
   const indexacao: string[] = [];
   const judgementBodyItems: any = [];
   
@@ -42,15 +43,14 @@ export const JSONtoModel = (data: any): IJudgement => {
       case BodyContentItem.DOCTRINE:    doutrina = value; break;
       case BodyContentItem.LEGISLATION: legislacao = value; break;
       case BodyContentItem.OBSERVATION: observacao = value; break;
-      case BodyContentItem.PUBLICATION: paginaInternaPublicacao = value; break;
-
+      
       case BodyContentItem.PARTS:
         partes = value.split('\n');
         break;
 
       case BodyContentItem.PUBLICATION: 
         paginaInternaPublicacao = value.replace('\n', ' ');
-        const djeRegex = paginaInternaPublicacao.match(/.*(dje-[0-9]*)/i);
+        const djeRegex = paginaInternaPublicacao.match(/.*(dj.{0,1}-[0-9]*)/i);
         if (djeRegex) {
           dje = djeRegex[1];
         }
@@ -78,16 +78,23 @@ export const JSONtoModel = (data: any): IJudgement => {
   return {
     id: data.id,
     titulo: data.titulo,
-    orgao: data.orgaostring,
+    orgao: data.orgao,
     relator,
     redator,
-    isPresident: !!data.relator.match('Presidente'),
-    dataJulgamento: parseDate(data.dataJulgamento),
-    dataPublicacao: parseDate(data.dataJulgamento),
+    relatorPresidente: !!data.relator.match('Presidente'),
+    redatorPresidente: data.redator && !!data.redator.match('Presidente'),
+    dataJulgamento: new Date(parseDate(data.dataJulgamento)),
+    dataPublicacao: new Date(parseDate(data.dataJulgamento)),
     ementa,
     partes,
     decisao,
     indexacao,
+    tese,
+    tema, 
+    doutrina,
+    legislacao,
+    observacao,
+    similares,
     paginaInternaUrl: data.dadosCompletos,
     paginaHTML: data.innerHTML,
     arquivoPdfUrl: data.pdfFileUrl,
@@ -97,6 +104,5 @@ export const JSONtoModel = (data: any): IJudgement => {
     dje,
     paginaInternaHTML: data.innerPage.innerHTML,
     documentId: Number(data.docId),
-    ...judgementBodyItems
   }
 }
