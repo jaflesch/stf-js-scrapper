@@ -9,7 +9,9 @@
     "pdf": "nodemon pdf.js --ignore *.json",
     "scrap": "ts-node ./src/index.ts --limit=100",
     "merge": "ts-node ./src/merge.ts",
-    "db": "ts-node ./src/mongo.ts"
+    "db": "ts-node ./src/mongo.ts",
+    "chart": "ts-node ./src/chart.ts",
+    "ndc": "nodemon"
   },
   "nodemonConfig": {
     "ignore": [
@@ -23,6 +25,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/axios": "^0.14.0",
+    "@types/chart.js": "^2.9.37",
     "@types/colors": "^1.2.1",
     "@types/date-fns": "^2.6.0",
     "@types/mongodb": "^4.0.7",
@@ -31,6 +34,7 @@
     "@types/puppeteer": "^5.4.6",
     "@types/yargs": "^17.0.11",
     "axios": "^0.27.2",
+    "chart.js": "^3.9.1",
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
     "date-fns": "^2.29.1",
@@ -40,6 +44,7 @@
     "mongoose": "^6.5.2",
     "node-downloader-helper": "^2.1.1",
     "nodemon": "^2.0.19",
+    "pug": "^3.0.2",
     "puppeteer": "^15.5.0",
     "ts-node": "^10.9.1",
     "yargs": "^17.5.1"
