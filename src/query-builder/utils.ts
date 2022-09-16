@@ -22,7 +22,7 @@ export const JSONtoModel = (data: any): IJudgement => {
   
   let partes: string[] = [];
   let paginaInternaPublicacao = '';
-  let ementa = '', decisao = '', dje = '', tese = '', tema = ''; 
+  let ementa = '', decisao = '', dje = '', tese = '', tema = '', origem = ''; 
   let doutrina = '', legislacao = '', observacao = '', similares = '';
   const indexacao: string[] = [];
   const judgementBodyItems: any = [];
@@ -59,7 +59,7 @@ export const JSONtoModel = (data: any): IJudgement => {
       case BodyContentItem.INDEXING:
         const tags = value.split(/(\n|,|\.)/g);
         for (const tag of tags) {
-          if (tag.length > 0 && tag !== '.' && tag !== ',' && tag !== '\n') {
+          if (tag.length > 0 && tag !== '.' && tag !== ',' && tag !== '\n' && tag !== ' ') {
             indexacao.push(tag.trim().replace(/- */, ''))
           }
         }
@@ -74,11 +74,14 @@ export const JSONtoModel = (data: any): IJudgement => {
     const d = date.split('/');
     return `${d[2]}-${d[1]}-${d[0]} 00:00:00`;
   }
+
+  const paginaInternaTitulo = data.innerPage.titulo.split('/');
   
   return {
     id: data.id,
     titulo: data.titulo,
     orgao: data.orgao,
+    origem: paginaInternaTitulo[1].trim(),
     relator,
     redator,
     relatorPresidente: !!data.relator.match('Presidente'),
@@ -98,7 +101,7 @@ export const JSONtoModel = (data: any): IJudgement => {
     paginaInternaUrl: data.dadosCompletos,
     paginaHTML: data.innerHTML,
     arquivoPdfUrl: data.pdfFileUrl,
-    paginaInternaTitulo: data.innerPage.titulo,
+    paginaInternaTitulo: paginaInternaTitulo[0].trim(),
     paginaInternaSubtitulo: data.innerPage.subtitulo,
     paginaInternaPublicacao,
     dje,

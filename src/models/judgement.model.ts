@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose';
 export interface IJudgement {
   id: string;
   titulo: string;
+  origem: string;
   orgao: string;
   relator: string;
   relatorPresidente: boolean;
@@ -40,6 +41,10 @@ const JudgementSchema = new Schema<IJudgement>({
     type: String,
     required: true,
   },
+  origem: {
+    type: String,
+    required: true,
+  },
   orgao: {
     type: String,
     required: true,
@@ -50,7 +55,7 @@ const JudgementSchema = new Schema<IJudgement>({
   },
   relatorPresidente: {
     type: Boolean,
-    required: true
+    required: true,
   },
   redator: {
     type: String,
@@ -58,7 +63,7 @@ const JudgementSchema = new Schema<IJudgement>({
   },
   redatorPresidente: {
     type: Boolean,
-    required: true
+    required: true,
   },
   dataJulgamento: {
     type: Date,
