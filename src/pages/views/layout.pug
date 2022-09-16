@@ -1,0 +1,39 @@
+block variables 
+
+<html>
+  head
+    block styles
+      link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT", crossorigin="anonymous")
+    
+    block head_scripts
+      script(src="https://code.jquery.com/jquery-3.6.1.min.js", integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=", crossorigin="anonymous")
+      script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js", integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous")
+      script(src="https://cdn.jsdelivr.net/npm/chart.js")
+      script(src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2")
+    
+    block metadata
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width, initial-scale=1")
+
+    block title
+      title= (page_title || 'LEAF | UFRGS 2022')
+  body
+    include _header
+
+    main(class="container-fluid")
+      div(class="row")
+        include _sidebar
+        
+        div(class="col-md-9")
+          h3(class="pb-4 mb-4 fst-italic border-bottom mt-3") Acórdãos por ministro relator
+
+          article(class="blog-post")
+            div(style="margin: 30px 0; overflow-x: auto;")
+              block chart
+
+          nav(class="blog-pagination", aria-label="Pagination", style="display: flex;justify-content: space-between; margin-bottom: 60px;")
+            a(class="btn btn-outline-primary rounded-pill", href="#") Anterior
+            a(class="btn btn-outline-secondary rounded-pill disabled") Próximo
+             
+    block scripts 
+</html>
