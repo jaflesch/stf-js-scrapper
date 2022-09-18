@@ -25,7 +25,8 @@ block variables
         include _sidebar
         
         div(class="col-md-9")
-          h3(class="pb-4 mb-4 fst-italic border-bottom mt-3") Acórdãos por ministro relator
+          if chartTitle
+            h3(class="pb-4 mb-4 fst-italic border-bottom mt-3")= chartTitle
 
           article(class="blog-post")
             div(style="margin: 30px 0; overflow-x: auto;")
