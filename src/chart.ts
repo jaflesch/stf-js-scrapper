@@ -1,14 +1,16 @@
-const express = require('express');
+import express, {Request, Response} from 'express';
+import { normalizeAverageValue } from './visualization/infra/normalize-avg-value';
+import { JudgementsByYearQuery } from './visualization/query/judgement-by-year.query';
 const app = express();
 const path = require('path');
 const router = express.Router();
 
 app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "pages/views"));
+app.set("views", path.join(__dirname, "pages"));
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-router.get('/', (req: any,res: any) => {
+router.get('/', (req: Request, res: Response) => {
   const chart = [
     { nome : "AYRES BRITTO", count : 564 },
     { nome : "CARLOS VELLOSO", count : 2 },
@@ -26,8 +28,7 @@ router.get('/', (req: any,res: any) => {
     { nome : "RICARDO LEWANDOWSKI", count : 634 }
   ];
 
-  const avg = chart.reduce((partialSum, a) => partialSum + a.count, 0) / chart.length;
-  const normalizedChart = chart.filter(r => r.count > (avg / 50))
+  const normalizedChart = normalizeAverageValue(chart, 50);
 
   if( normalizedChart.length > 0) {
     normalizedChart.push({
@@ -40,6 +41,16 @@ router.get('/', (req: any,res: any) => {
     chart: normalizedChart,
   });
 });
+
+router.get('/acordao-ano', async ({ query }: Request, res: Response) => {
+  const judgementByYearsQuery = new JudgementsByYearQuery();
+  const chart = await judgementByYearsQuery.execute(query);
+  
+  res.render("acordao-ano", { 
+    chartTitle: 'Acordãos por período',
+    chart: JSON.stringify(chart) 
+  });
+})
 
 app.use('/', router);
 app.listen(process.env.PORT || 3000);
