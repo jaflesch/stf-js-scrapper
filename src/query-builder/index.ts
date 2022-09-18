@@ -17,6 +17,10 @@ export class QueryBuilder<T> implements IQueryBuilder {
     })();
   }
 
+  $ () {
+    return this.model;
+  }
+
   create (data: any) {
     return this.model.create(data);
   }
