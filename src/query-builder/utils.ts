@@ -81,7 +81,7 @@ export const JSONtoModel = (data: any): IJudgement => {
     id: data.id,
     titulo: data.titulo,
     orgao: data.orgao,
-    origem: paginaInternaTitulo[1].trim(),
+    origem: paginaInternaTitulo[1]?.trim(),
     relator,
     redator,
     relatorPresidente: !!data.relator.match('Presidente'),
