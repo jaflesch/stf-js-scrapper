@@ -2,6 +2,7 @@ import { Query } from "../domain/query";
 import { Judgement } from "../../models/judgement.model";
 import { QueryBuilder } from "../../query-builder";
 import { getMonthName } from "../infra/get-month-name";
+import { MongoDBPipeline } from "../infra/mongodb-pipeline.type";
 
 type Params = {
   startAt?: string;
@@ -17,27 +18,23 @@ type Result = Array<{
 
 export class JudgementsByYearQuery implements Query <Params, Result> {
   public async execute(queryParams: Params) {
-    const project = [], match = [];
-
-    if (queryParams.startAt) {
-      project.push({
-        gtYear: {
-          $gte: ["$_id.year", Number(queryParams.startAt)]
-        }
-      });
-      match.push({ gtYear: true });
-    }
-    if (queryParams.endAt) {
-      project.push({
-        ltYear: {
-          $lte: ["$_id.year", Number(queryParams.endAt)]
-        }
-      });
-      match.push({ ltYear: true })
-    }
-
+    const { match } = this.mountQueryParams(queryParams);
     const qb = new QueryBuilder(Judgement).$();
+
     const rows = await qb.aggregate([
+      {
+        $addFields: {
+          year: {
+            $year: '$dataJulgamento'
+          },
+          month: {
+            $month: '$dataJulgamento'
+          },
+        }
+      },
+      { 
+        $match: { ...match }
+      },
       {
         $group: {
           _id: {
@@ -52,13 +49,9 @@ export class JudgementsByYearQuery implements Query <Params, Result> {
           count: "$count",
           month: "$_id.month",
           year: "$_id.year",
-          ...project,
           _id: 0
         }
-      },
-      { 
-        $match: { ...match }
-      },
+      },      
       {
         $sort: {
           year: 1,
@@ -77,5 +70,28 @@ export class JudgementsByYearQuery implements Query <Params, Result> {
     });
 
     return result;
+  }
+
+  private mountQueryParams (queryParams: Params): MongoDBPipeline {
+    const match: MongoDBPipeline['match'] = {};
+    const project: MongoDBPipeline['project'] = {};
+    const yearMatch = [];
+
+    if (queryParams.startAt) {
+      yearMatch.push({ 
+        year: { 
+          $gte: Number(queryParams.startAt) 
+        } 
+      });
+    }
+    if (queryParams.endAt) {
+      yearMatch.push({
+        year: {
+          $lte: Number(queryParams.endAt)
+        }
+      });
+    }
+
+    return { match, project }
   }
 }
