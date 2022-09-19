@@ -3,7 +3,8 @@ import express, {Request, Response} from 'express';
 import { normalizeAverageValue } from './visualization/infra/normalize-avg-value';
 import { 
   JudgementsByYearQuery,
-  JudgementsByRappoteurQuery, 
+  JudgementsByRappoteurQuery,
+  JudgementsByWriterQuery, 
 } from './visualization/query';
 
 const app = express();
@@ -64,7 +65,17 @@ router.get('/acordao-relator', async ({ query }: Request, res: Response) => {
     chartTitle: 'Acordãos por relator',
     chart: JSON.stringify(chart) 
   });
-})
+});
+
+router.get('/acordao-redator', async ({ query }: Request, res: Response) => {
+  const judgementByRapporteur = new JudgementsByWriterQuery();
+  const chart = await judgementByRapporteur.execute(query);
+  
+  res.render("acordao-redator", { 
+    chartTitle: 'Acordãos por redator',
+    chart: JSON.stringify(chart) 
+  });
+});
 
 app.use('/', router);
 app.listen(process.env.PORT || 3000);
