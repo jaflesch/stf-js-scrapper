@@ -106,8 +106,11 @@ export class JudgementsByRappoteurQuery implements Query <Params, ResultDTO> {
         };
       }
     }
-    match.$and = yearMatch;
 
+    if (yearMatch.length > 0) {
+      match.$and = yearMatch;
+    }
+    
     return { match, group }
   }
 }
