@@ -1,8 +1,12 @@
+import path from 'path';
 import express, {Request, Response} from 'express';
 import { normalizeAverageValue } from './visualization/infra/normalize-avg-value';
-import { JudgementsByYearQuery } from './visualization/query/judgement-by-year.query';
+import { 
+  JudgementsByYearQuery,
+  JudgementsByRappoteurQuery, 
+} from './visualization/query';
+
 const app = express();
-const path = require('path');
 const router = express.Router();
 
 app.set("view engine", "pug");
@@ -43,11 +47,21 @@ router.get('/', (req: Request, res: Response) => {
 });
 
 router.get('/acordao-ano', async ({ query }: Request, res: Response) => {
-  const judgementByYearsQuery = new JudgementsByYearQuery();
-  const chart = await judgementByYearsQuery.execute(query);
+  const judgementsByYearsQuery = new JudgementsByYearQuery();
+  const chart = await judgementsByYearsQuery.execute(query);
   
   res.render("acordao-ano", { 
     chartTitle: 'Acordãos por período',
+    chart: JSON.stringify(chart) 
+  });
+});
+
+router.get('/acordao-relator', async ({ query }: Request, res: Response) => {
+  const judgementByRapporteur = new JudgementsByRappoteurQuery();
+  const chart = await judgementByRapporteur.execute(query);
+  
+  res.render("acordao-relator", { 
+    chartTitle: 'Acordãos por relator',
     chart: JSON.stringify(chart) 
   });
 })
