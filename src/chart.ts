@@ -3,8 +3,9 @@ import express, {Request, Response} from 'express';
 import { normalizeAverageValue } from './visualization/infra/normalize-avg-value';
 import { 
   JudgementsByYearQuery,
+  JudgementsByWriterQuery,
+  JudicialBodyByYearQuery, 
   JudgementsByRappoteurQuery,
-  JudgementsByWriterQuery, 
 } from './visualization/query';
 
 const app = express();
@@ -73,6 +74,16 @@ router.get('/acordao-redator', async ({ query }: Request, res: Response) => {
   
   res.render("acordao-redator", { 
     chartTitle: 'Acordãos por redator',
+    chart: JSON.stringify(chart) 
+  });
+});
+
+router.get('/orgao-ano', async ({ query }: Request, res: Response) => {
+  const judicialBodyByYearQuery = new JudicialBodyByYearQuery();
+  const chart = await judicialBodyByYearQuery.execute(query);
+  
+  res.render("orgao-ano", { 
+    chartTitle: 'Órgão julgador por ano',
     chart: JSON.stringify(chart) 
   });
 });
