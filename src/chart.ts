@@ -69,8 +69,8 @@ router.get('/acordao-relator', async ({ query }: Request, res: Response) => {
 });
 
 router.get('/acordao-redator', async ({ query }: Request, res: Response) => {
-  const judgementByRapporteur = new JudgementsByWriterQuery();
-  const chart = await judgementByRapporteur.execute(query);
+  const judgementsByWriter = new JudgementsByWriterQuery();
+  const chart = await judgementsByWriter.execute(query);
   
   res.render("acordao-redator", { 
     chartTitle: 'Acordãos por redator',
