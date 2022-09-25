@@ -35,6 +35,9 @@ export class JudicialBodyByYearQuery implements Query <Params, ResultDTO> {
       },
       { 
         $match: { 
+          orgao: {
+            $ne : ""
+          },
           ...match 
         }
       },

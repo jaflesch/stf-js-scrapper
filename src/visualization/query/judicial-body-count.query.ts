@@ -12,6 +12,13 @@ export class JudicialBodyCountQuery implements Query <void, ResultDTO> {
     const qb = new QueryBuilder(Judgement).$();    
     
     const result: ResultDTO = await qb.aggregate([
+      {      
+        $match: {
+          orgao: {
+            $ne : ""
+          }
+        }
+      },
       {
         $group: {
           _id: {
@@ -19,7 +26,7 @@ export class JudicialBodyCountQuery implements Query <void, ResultDTO> {
           },
           count: { $sum: 1 }
         }
-      },
+      },      
       {
         $project: {
           judicialBody: "$_id.judicialBody",
