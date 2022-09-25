@@ -1,0 +1,90 @@
+extends templates/layout
+
+block variables 
+  - var page_title = 'Órgão julgador por ano';
+
+append title 
+    title= (page_title || 'LEAF | UFRGS 2022')
+
+block chart 
+  div(style="display:flex;align-items:center; gap: 32px")
+    div(style='width:600px; height:auto;')
+      canvas#myChart 
+    div
+      div#chart-labels(style='display:none; padding: 8px; border:1px solid #ddd;')
+  script.
+    $(document).ready(() => {
+      const dt = !{ chart };
+      const colors = ['#66358f', '#cada3e', '#4771b5'];      
+      const filteredDataset = dt.filter(d => d.judicialBody !== null);
+
+      const chartData = filteredDataset.map(d => d.count);
+      const labels = filteredDataset.map(d => d.judicialBody);
+      
+      const data = {
+        labels,
+        datasets: [{
+          label: 'Acórdãos',
+          backgroundColor: colors,
+          borderWidth: 0,
+          borderAlign: 'inner',
+          data: chartData,
+        }]
+      };
+
+      const config = {
+        data,
+        type: 'doughnut',
+        options: {
+          responsive: true,
+          plugins: {
+            labels: {
+              render: 'percentage',
+              fontColor: ['green', 'white', 'red'],
+              precision: 2
+            },
+            legend: {
+              display: false
+            },
+            title: { 
+              display: false 
+            },
+          },
+        },
+        tooltips: {
+          enabled: false
+        },
+        animation: {
+          duration: 0,
+          onComplete: function () {
+            var ctx = this.chart.ctx;
+            ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, 'normal', Chart.defaults.global.defaultFontFamily);
+            ctx.fillStyle = this.chart.config.options.defaultFontColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            this.data.datasets.forEach(function (dataset) {
+              for (var i = 0; i < dataset.data.length; i++) {
+                var model = dataset._meta[Object.keys(dataset._meta)[0]].data[i]._model;
+                ctx.fillText(dataset.data[i], model.x, model.y - 5);
+              }
+            });
+          }
+        }
+      };
+
+      const myChart = new Chart(
+        $('#myChart'), config
+      );
+
+      $('#chart-labels').html(
+        labels.map((l, i) => {
+          return `
+            <div style="display:flex;gap: 8px;margin-bottom: ${(i === labels.length - 1) ? 0 : '8px'}; align-items: center;">
+              <div style='background-color:${colors[i]};width:28px;height:28px;'></div>
+              <span style='font-size: 14px;font-weight: 600'>${l} (${chartData[i]})</span>
+            </div>
+          `;
+        }).join('')
+      ).show();      
+    });
+    
