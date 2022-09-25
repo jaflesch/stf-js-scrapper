@@ -3,6 +3,7 @@ import express, {Request, Response} from 'express';
 import { normalizeAverageValue } from './visualization/infra/normalize-avg-value';
 import { 
   JudgementsByYearQuery,
+  JudicialBodyCountQuery,
   JudgementsByWriterQuery,
   JudicialBodyByYearQuery, 
   JudgementsByRappoteurQuery,
@@ -83,7 +84,17 @@ router.get('/orgao-ano', async ({ query }: Request, res: Response) => {
   const chart = await judicialBodyByYearQuery.execute(query);
   
   res.render("orgao-ano", { 
-    chartTitle: 'Órgão julgador por ano',
+    chartTitle: 'Acórdãos / Órgão julgador / ano',
+    chart: JSON.stringify(chart) 
+  });
+});
+
+router.get('/votos-orgao', async (_req: Request, res: Response) => {
+  const judicialBodyCountQuery = new JudicialBodyCountQuery();
+  const chart = await judicialBodyCountQuery.execute();
+  
+  res.render("votos-orgao", { 
+    chartTitle: 'Total acõrdãos / Órgão julgador',
     chart: JSON.stringify(chart) 
   });
 });
