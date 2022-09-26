@@ -7,6 +7,7 @@ import {
   JudgementsByWriterQuery,
   JudicialBodyByYearQuery, 
   JudgementsByRappoteurQuery,
+  JudgementsByLocationCountQuery,
 } from './visualization/query';
 
 const app = express();
@@ -17,7 +18,7 @@ app.set("views", path.join(__dirname, "pages"));
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (_req: Request, res: Response) => {
   const chart = [
     { nome : "AYRES BRITTO", count : 564 },
     { nome : "CARLOS VELLOSO", count : 2 },
@@ -96,6 +97,24 @@ router.get('/votos-orgao', async (_req: Request, res: Response) => {
   res.render("votos-orgao", { 
     chartTitle: 'Total acõrdãos / Órgão julgador',
     chart: JSON.stringify(chart) 
+  });
+});
+
+router.get('/votos-local', async ({ query }: Request, res: Response) => {
+  const judgementsByLocationCountQuery = new JudgementsByLocationCountQuery();
+  const chart = await judgementsByLocationCountQuery.execute(query);
+  
+  if (query.limit) {
+    chart.items.push({
+      location: 'OUTROS',
+      count: chart.total,
+    });
+  }
+
+  res.render("votos-local", { 
+    limit: query.limit ?? -1,
+    chartTitle: 'Total acõrdãos / Local',
+    chart: JSON.stringify(chart),
   });
 });
 
