@@ -7,13 +7,19 @@ export class MergeController {
   private filefolders = '../json';
   private content = null;
   private paginated = false;
+  private destinationFolder = path.join(__dirname, '../db');
 
   constructor (
-    folderPath?: string,
+    mergeFolder?: string,
+    destinationFolder?: string,
     paginated?: boolean,
   ) {
-    if (folderPath) {
-      this.filefolders = folderPath;
+    if (mergeFolder) {
+      this.filefolders = mergeFolder;
+    }
+
+    if (destinationFolder) {
+      this.destinationFolder = path.join(__dirname, destinationFolder);
     }
     this.paginated = paginated ?? true;
     this.folderPath = path.join(__dirname, this.filefolders);
@@ -32,7 +38,7 @@ export class MergeController {
 
   private save (): void {
     const fileName = path.parse(this.folderPath).base;
-    const filePath = path.join(this.folderPath, `${this.filefolders ? fileName : 'import'}.merge.json`);
+    const filePath = path.join(this.destinationFolder, `${this.filefolders ? fileName : 'import'}.merge.json`);
 
     fs.writeFile(
       filePath, 
