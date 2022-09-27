@@ -2,32 +2,44 @@ const fs = require('fs');
 const path = require('path');
 import colors from 'colors';
 
+type MergeControllerParams = {
+  target?: string,
+  basePath?: string;
+  paginated?: boolean,
+}
+
 export class MergeController {
-  private folderPath = '';
-  private filefolders = '../json';
-  private content = null;
   private paginated = false;
+  private content: object[] = [];
+  private folderPath: string[] = [];
+  private filefolders = ['../json'];
   private destinationFolder = path.join(__dirname, '../db');
 
   constructor (
-    mergeFolder?: string,
-    destinationFolder?: string,
-    paginated?: boolean,
+    source: string | string[], 
+    options?: MergeControllerParams
   ) {
-    if (mergeFolder) {
-      this.filefolders = mergeFolder;
+    if (Array.isArray(source)) {
+      this.filefolders = source;
+    } else {
+      this.filefolders = [source];
     }
 
-    if (destinationFolder) {
-      this.destinationFolder = path.join(__dirname, destinationFolder);
+    if (options?.target) {
+      this.destinationFolder = path.join(__dirname, options.target);
     }
-    this.paginated = paginated ?? true;
-    this.folderPath = path.join(__dirname, this.filefolders);
+
+    this.paginated = options?.paginated ?? true;
+    this.folderPath = this.filefolders.map(f => path.join(
+       __dirname, 
+       options?.basePath ? options.basePath : '',
+       f
+    ));
   }
 
   async run () {
     if (this.paginated) {
-      this.content = this.parsePaginatedFiles();
+      this.parsePaginatedFiles();
     } else {
       // to do:
       //this.content = this.parseSingleFile();
@@ -37,30 +49,39 @@ export class MergeController {
   }
 
   private save (): void {
-    const fileName = path.parse(this.folderPath).base;
-    const filePath = path.join(this.destinationFolder, `${this.filefolders ? fileName : 'import'}.merge.json`);
-
-    fs.writeFile(
-      filePath, 
-      JSON.stringify(this.content), 
-      'utf8', 
-      (err: Error) => {
-        if(err) {
-          console.log(colors.red(`Error when creating merged JSON data: ${err}`));
-        } else {
-          console.log(colors.green(`The data has been merged and saved successfully! View it at '${filePath}'`));
+    let i = 0;
+    for (const f of this.folderPath) {
+      const fileName = path.parse(f).base;
+      const filePath = path.join(this.destinationFolder, `${this.filefolders ? fileName : 'import'}.merge.json`);
+      
+      fs.writeFile(
+        filePath, 
+        JSON.stringify(this.content[i++]), 
+        'utf8', 
+        (err: Error) => {
+          if(err) {
+            console.log(colors.red(`Error when creating merged JSON data: ${err}`));
+          } else {
+            console.log(colors.green(`The data has been merged and saved successfully! View it at '${filePath}'`));
+          }
         }
-      }
-    );
+      );
+    }
   }
 
   private parsePaginatedFiles () {
-    const folders = this.parseFolders();
-    return this.readPaginatedFiles(folders);
+    let i = 0;
+    for (const folder of this.folderPath) {
+      const folders = this.parseFolders(folder);
+      this.content.push(
+        this.readPaginatedFiles(folders, i)
+      );
+      i++;
+    }
   }
 
-  private parseFolders (): number[] {    
-    const dirFiles = fs.readdirSync(this.folderPath);
+  private parseFolders (folderPath: string): number[] {    
+    const dirFiles = fs.readdirSync(folderPath);
     
     const folders = [];
     for (let i = 0; i < dirFiles.length; i++) {
@@ -73,11 +94,11 @@ export class MergeController {
     return folders;
   }
     
-  private readPaginatedFiles (folders: number[]) {
+  private readPaginatedFiles (folders: number[], index: number) {
     let mergedJson: any = [];
     folders.map((folder: number) => {
-      const jsonFile = fs.readdirSync(`${this.folderPath}/${folder}`)[0];
-      const data = fs.readFileSync(`${this.folderPath}/${folder}/${jsonFile}`);
+      const jsonFile = fs.readdirSync(`${this.folderPath[index]}/${folder}`)[0];
+      const data = fs.readFileSync(`${this.folderPath[index]}/${folder}/${jsonFile}`);
       mergedJson = mergedJson.concat(...JSON.parse(data));
     });
 
