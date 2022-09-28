@@ -5,6 +5,7 @@ export interface IJudgement {
   titulo: string;
   origem: string;
   orgao: string;
+  categoria: string;
   relator: string;
   relatorPresidente: boolean;
   redator: string;
@@ -14,6 +15,8 @@ export interface IJudgement {
   ementa: string;
   partes: string[];
   decisao: string;
+  decisaoUnanime?: boolean;
+  decisaoAdiada: boolean;
   indexacao: string[];
   paginaInternaUrl: string;
   paginaHTML: string;
@@ -29,7 +32,7 @@ export interface IJudgement {
   doutrina: string;
   legislacao: string;
   observacao: string;
-  similares: string;
+  similares: string;  
 }
 
 const JudgementSchema = new Schema<IJudgement>({
@@ -46,6 +49,10 @@ const JudgementSchema = new Schema<IJudgement>({
     required: true,
   },
   orgao: {
+    type: String,
+    required: true,
+  },
+  categoria: {
     type: String,
     required: true,
   },
@@ -84,6 +91,14 @@ const JudgementSchema = new Schema<IJudgement>({
   decisao: {
     type: String,
     required: true,
+  },
+  decisaoAdiada: {
+    type: Boolean,
+    required: true
+  },
+  decisaoUnanime: {
+    type: Boolean,
+    required: true
   },
   indexacao: {
     type: [String],
