@@ -5,103 +5,114 @@ block variables
 
 append head_scripts 
   link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
+  link(href='/public/css/style.css', rel="stylesheet")
+  
+  script.
+    $(document).ready(() => {
+      $('.section-title button').on("click", function() {
+        const target = $(this).attr("data-target");
+        const isOpen = $(target).hasClass("show");
+        $(target).collapse('toggle');        
+
+        $(this).find('.material-icons').text(isOpen ? 'expand_more' : 'expand_less')
+      });
+    });
 
 append title 
     title= (page_title || 'LEAF | UFRGS 2022')
 
 block main 
   div(class="container mb-4")
-    h3(class="pb-2 mb-4 border-bottom mt-4") Acordãos
-    div(class="row")
-      div(class="col mb-4")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") equalizer
-            h5(class="card-title") Acórdãos / ano
+    div#accordion 
+    
+    div(class="section-title border-bottom pb-2 mb-4 mt-4")
+      h3 Acordãos
+      button(data-toggle="collapse", data-target="#sec-acordaos", aria-expanded="true", aria-controls="collapseOne", class="btn")
+        span.material-icons expand_less
 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+    div(id="sec-acordaos", class="collapse show" data-parent="#accordion")
+      div(class="row")
+        div(class="col mb-4")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") equalizer
+              h5(class="card-title") Acórdãos / ano
 
-      div(class="col mb-4")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") equalizer
-            h5(class="card-title") Acórdãos / relator
+              p(class="card-text") Total de acórdãos por ano (ou período)
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+        div(class="col mb-4")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") equalizer
+              h5(class="card-title") Acórdãos / relator
 
-      div(class="col mb-4")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") equalizer
-            h5(class="card-title") Acórdãos / relator / ano
+              p(class="card-text") Acórdãos agrupados por relatores
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+        div(class="col mb-4")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") equalizer
+              h5(class="card-title") Acórdãos / relator / ano
 
-      div(class="col mb-4")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") equalizer
-            h5(class="card-title") Acórdãos / redator
+              p(class="card-text") Acórdãos de um relator agrupados por ano
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+        div(class="col mb-4")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") equalizer
+              h5(class="card-title") Acórdãos / redator
 
-    div(class="row")
-      div(class="col mb-4")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") equalizer
-            h5(class="card-title") Acórdãos / redator / ano
+              p(class="card-text") Acórdãos agrupados por redatores
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+      div(class="row")
+        div(class="col mb-4")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") equalizer
+              h5(class="card-title") Acórdãos / redator / ano
+              p(class="card-text") Acórdãos de um redator agrupados por ano
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-      div(class="col mb-4")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") pie_chart
-            h5(class="card-title") Acórdãos / Órgão 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+        div(class="col mb-4")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") pie_chart
+              h5(class="card-title") Acórdãos / Órgão 
+              p(class="card-text") Acórdãos agrupados pelo Órgão julgador
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-      div(class="col mb-4")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") stacked_bar_chart
-            h5(class="card-title") Acórdãos / Órgão / ano
+        div(class="col mb-4")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") stacked_bar_chart
+              h5(class="card-title") Acórdãos / Órgão / ano
 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+              p(class="card-text") Acórdãos agrupados por Órgão julgador e ano
+              //- a(href="#", class="btn btn-primary") Go somewhere
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-      div(class="col mb-4")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") equalizer
-            h5(class="card-title") Acórdãos / categoria
+        div(class="col mb-4")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") equalizer
+              h5(class="card-title") Acórdãos / categoria
 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+              p(class="card-text") Acordãos agrupados por tipo de documento
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-    div(class="row")
+      div(class="row")
       div(class="col-3")
         div(class="card custom-card")
           div(class="card-body")
@@ -109,116 +120,117 @@ block main
               span(class="material-icons") equalizer
 
             h5(class="card-title") Acórdãos / categoria / ano
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            a(href="#", class="text-primary") Ver dados
+            p(class="card-text") Grupos por tipo de documento e ano
+            a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
     
-    h3(class="pb-2 mb-4 border-bottom mt-4") Decisões    
-    div(class="row")
-      div(class="col col-3")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") pie_chart
-            h5(class="card-title") Tipo de decisão
+    div(class="section-title border-bottom pb-2 mb-4 mt-4")
+      h3 Decisões
+      button(data-toggle="collapse", data-target="#sec-decisoes", aria-expanded="true", aria-controls="collapseTwo", class="btn")
+        span.material-icons expand_less
 
-            p(class="card-text") Decisão por maioria de votos ou unânime
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+    div(id="sec-decisoes", class="collapse show" data-parent="#accordion") 
+      div(class="row")
+        div(class="col col-3")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") pie_chart
+              h5(class="card-title") Tipo de decisão
 
-      div(class="col col-3")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") stacked_bar_chart
-            h5(class="card-title") Tipo de decisão / ano
+              p(class="card-text") Maioria de votos ou unanimidade
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-            p(class="card-text") Decisão por maioria de votos ou unânime
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
-      
-      div(class="col col-3")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") pie_chart
-            h5(class="card-title") Adiamentos
+        div(class="col col-3")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") stacked_bar_chart
+              h5(class="card-title") Tipo de decisão / ano
 
-            p(class="card-text") Votação e/ou julgamento adiados ou não
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+              p(class="card-text") Decisão por tipo agrupadas por ano
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+        
+        div(class="col col-3")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") pie_chart
+              h5(class="card-title") Adiamentos
+
+              p(class="card-text") Votação e/ou decisão adiados ou não
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
 
-      div(class="col col-3")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") stacked_bar_chart
-            h5(class="card-title") Adiamentos / ano
+        div(class="col col-3")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") stacked_bar_chart
+              h5(class="card-title") Adiamentos / ano
 
-            p(class="card-text") Votação e/ou julgamento adiados ou não
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+              p(class="card-text") Adiamentos agrupados por ano
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-    h3(class="pb-2 mb-4 border-bottom mt-4") Votos    
-    div(class="row")
-      div(class="col col-3")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") pie_chart
-            h5(class="card-title") Votos / acordão
+    div(class="section-title border-bottom pb-2 mb-4 mt-4")
+      h3 Votos
+      button(data-toggle="collapse", data-target="#sec-votos", aria-expanded="true", aria-controls="collapseThree", class="btn")
+        span.material-icons expand_less
 
-            p(class="card-text") Quantidade de votos por acórdãos
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+    div(id="sec-votos", class="collapse show" data-parent="#accordion") 
+      div(class="row")
+        div(class="col col-3")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") pie_chart
+              h5(class="card-title") Votos / acordão
 
-      div(class="col col-3")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") equalizer
-            h5(class="card-title") Votos / ministro
+              p(class="card-text") Quantidade de votos por acórdãos
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-            p(class="card-text") Decisão por maioria de votos ou unânime
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+        div(class="col col-3")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") equalizer
+              h5(class="card-title") Votos / ministro
 
-      div(class="col col-3")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") stacked_bar_chart
-            h5(class="card-title") Votos monocráticos / ano
+              p(class="card-text") Decisão por maioria de votos ou unânime
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-            p(class="card-text") Decisão por maioria de votos ou unânime
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
+        div(class="col col-3")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") bar_chart
+              h5(class="card-title") Votos monocráticos / ano
 
-    h3(class="pb-2 mb-4 border-bottom mt-4") Localizações    
-    div(class="row")
-      div(class="col-3")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") equalizer
-            h5(class="card-title") Acórdãos / federação
+              p(class="card-text") Decisões com voto de um magistrado por ano
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
-      
-      div(class="col-3")
-        div(class="card custom-card")
-          div(class="card-body")
-            div(class="icon")
-              span(class="material-icons") equalizer
-            h5(class="card-title") Acórdãos / Estado
+    div(class="section-title border-bottom pb-2 mb-4 mt-4")
+      h3 Localizações
+      button(data-toggle="collapse", data-target="#sec-localizacao", aria-expanded="true", aria-controls="collapseFour", class="btn")
+        span.material-icons expand_less
+        
+    div(id="sec-localizacao", class="collapse show" data-parent="#accordion") 
+      div(class="row")
+        div(class="col-3")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") equalizer
+              h5(class="card-title") Acórdãos / federação
 
-            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
-            //- a(href="#", class="btn btn-primary") Go somewhere
-            a(href="#", class="text-primary") Ver dados
-     
+              p(class="card-text") Exibe acórdãos por estados brasileiros
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+        
+        div(class="col-3")
+          div(class="card custom-card")
+            div(class="card-body")
+              div(class="icon")
+                span(class="material-icons") equalizer
+              h5(class="card-title") Acórdãos / Estado
 
-block scripts 
-  link(href='/public/css/style.css', rel="stylesheet")
-    
+              p(class="card-text") Exibe acórdãos por país relacionado
+              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
