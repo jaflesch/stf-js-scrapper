@@ -1,186 +1,224 @@
-extends templates/layout
+extends templates/home
 
 block variables 
   - var page_title = 'Exemplo';
 
+append head_scripts 
+  link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
+
 append title 
     title= (page_title || 'LEAF | UFRGS 2022')
 
-block chart 
-  div(style="width:80%; height:auto;")
-    canvas#myChart 
-    div 
-      p#labels
-        each relator in chart ? chart : []
-          span= relator.nome+','+relator.count
-  
-  script.
-    $(document).ready(() => {
-      Chart.defaults.set('plugins.datalabels', {
-        color: '#FE777B'
-      });
+block main 
+  div(class="container mb-4")
+    h3(class="pb-2 mb-4 border-bottom mt-4") Acordãos
+    div(class="row")
+      div(class="col mb-4")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+            h5(class="card-title") Acórdãos / ano
 
-      const dt = [];
-      $('#labels span').each(function(i, el) {
-          const span = $(el);
-          const [nome, count] = span.text().split(',');
-          dt.push({ 
-            nome, 
-            count: Number(count),
-          })
-      });
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
 
-      console.log($('#labels span'), dt);
-          
-      //- if (t) {
-        const labels = dt.map(d => d.nome);
+      div(class="col mb-4")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+            h5(class="card-title") Acórdãos / relator
 
-        const data = {
-          labels,
-          datasets: [{
-            label: 'Acórdãos',
-            backgroundColor: ['#004c6d','#246484','#3e7d9c','#5797b4','#70b2cd','#8acee6','#a4eaff'],
-            borderColor: ['#004c6d','#246484','#3e7d9c','#5797b4','#70b2cd','#8acee6','#a4eaff'],
-            borderWidth: 0,
-            borderAlign: 'inner',
-            data: dt.map(d => d.count),
-            datalabels: {
-              color: '#ff0000'
-            }
-          }]
-        };
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
 
-        const config = {
-          type: 'bar',
-          data: data,
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                position: 'right',
-                display: false,
-              },
-              title: {
-                display: true,
-                text: 'Acórdãos / Relator (2010)'
-              },
-            },
-          },
-          tooltips: {
-            enabled: false
-          },
-          animation: {
-            duration: 0,
-            onComplete: function () {
-              // render the value of the chart above the bar
-              var ctx = this.chart.ctx;
-              ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, 'normal', Chart.defaults.global.defaultFontFamily);
-              ctx.fillStyle = this.chart.config.options.defaultFontColor;
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'bottom';
-              this.data.datasets.forEach(function (dataset) {
-                for (var i = 0; i < dataset.data.length; i++) {
-                  var model = dataset._meta[Object.keys(dataset._meta)[0]].data[i]._model;
-                  ctx.fillText(dataset.data[i], model.x, model.y - 5);
-                }
-              });
-            }
-          }
-        };
-      //- }
+      div(class="col mb-4")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+            h5(class="card-title") Acórdãos / relator / ano
 
-      const myChart = new Chart(
-        $('#myChart'), config
-      );  
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
 
-      var DATA_COUNT = 10;
-      //var labels = [];
+      div(class="col mb-4")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+            h5(class="card-title") Acórdãos / redator
 
-      //Utils.srand(2);
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
 
-      for (var i = 0; i < DATA_COUNT; ++i) {
-        labels.push('' + i);
-      }
+    div(class="row")
+      div(class="col mb-4")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+            h5(class="card-title") Acórdãos / redator / ano
 
-      var opt = {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            backgroundColor: '#000',
-            data: labels,
-            datalabels: {
-              align: 'start',
-              anchor: 'start'
-            }
-          }, {
-            backgroundColor: '#ff00ff',
-            data: labels,
-            datalabels: {
-              align: 'center',
-              anchor: 'center'
-            }
-          }, {
-            backgroundColor: '#aaa',
-            data: labels,
-            datalabels: {
-              anchor: 'end',
-              align: 'end',
-            }
-          }]
-        },
-        options: {
-          plugins: {
-            datalabels: {
-              color: 'white',
-              display: function(context) {
-                return context.dataset.data[context.dataIndex] > 0;
-              },
-              font: {
-                weight: 'bold'
-              },
-              formatter: Math.round
-            }
-          },
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
 
-          // Core options
-          aspectRatio: 5 / 3,
-          layout: {
-            padding: {
-              top: 24,
-              right: 16,
-              bottom: 0,
-              left: 8
-            }
-          },
-          elements: {
-            line: {
-              fill: false
-            },
-            point: {
-              hoverRadius: 7,
-              radius: 5
-            }
-          },
-          scales: {
-            x: {
-              stacked: true
-            },
-            y: {
-              stacked: true
-            }
-          }
-        }
-      }
+      div(class="col mb-4")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") pie_chart
+            h5(class="card-title") Acórdãos / Órgão 
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
 
-      //- var ctx = document.getElementById('myChart');
-      //- Chart.register(ChartDataLabels);
-      //- //- Chart.defaults.global.plugins.datalabels.anchor = 'end';
-      //- //- Chart.defaults.global.plugins.datalabels.align = 'end';
-      //- Chart.defaults.set('plugins.datalabels', {
-      //-   align: 'end',
-      //-   anchor: 'end'
-      //- });
-      //- var pieChart = new Chart(ctx, opt);
-    })
+      div(class="col mb-4")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") stacked_bar_chart
+            h5(class="card-title") Acórdãos / Órgão / ano
+
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+
+      div(class="col mb-4")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+            h5(class="card-title") Acórdãos / categoria
+
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+
+    div(class="row")
+      div(class="col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+
+            h5(class="card-title") Acórdãos / categoria / ano
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            a(href="#", class="text-primary") Ver dados
+    
+    h3(class="pb-2 mb-4 border-bottom mt-4") Decisões    
+    div(class="row")
+      div(class="col col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") pie_chart
+            h5(class="card-title") Tipo de decisão
+
+            p(class="card-text") Decisão por maioria de votos ou unânime
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+
+      div(class="col col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") stacked_bar_chart
+            h5(class="card-title") Tipo de decisão / ano
+
+            p(class="card-text") Decisão por maioria de votos ou unânime
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+      
+      div(class="col col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") pie_chart
+            h5(class="card-title") Adiamentos
+
+            p(class="card-text") Votação e/ou julgamento adiados ou não
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+
+
+      div(class="col col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") stacked_bar_chart
+            h5(class="card-title") Adiamentos / ano
+
+            p(class="card-text") Votação e/ou julgamento adiados ou não
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+
+    h3(class="pb-2 mb-4 border-bottom mt-4") Votos    
+    div(class="row")
+      div(class="col col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") pie_chart
+            h5(class="card-title") Votos / acordão
+
+            p(class="card-text") Quantidade de votos por acórdãos
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+
+      div(class="col col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+            h5(class="card-title") Votos / ministro
+
+            p(class="card-text") Decisão por maioria de votos ou unânime
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+
+      div(class="col col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") stacked_bar_chart
+            h5(class="card-title") Votos monocráticos / ano
+
+            p(class="card-text") Decisão por maioria de votos ou unânime
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+
+    h3(class="pb-2 mb-4 border-bottom mt-4") Localizações    
+    div(class="row")
+      div(class="col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+            h5(class="card-title") Acórdãos / federação
+
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+      
+      div(class="col-3")
+        div(class="card custom-card")
+          div(class="card-body")
+            div(class="icon")
+              span(class="material-icons") equalizer
+            h5(class="card-title") Acórdãos / Estado
+
+            p(class="card-text") Some quick example text to build on the card title and make up the bulk of the card's content
+            //- a(href="#", class="btn btn-primary") Go somewhere
+            a(href="#", class="text-primary") Ver dados
+     
+
+block scripts 
+  link(href='/public/css/style.css', rel="stylesheet")
     
