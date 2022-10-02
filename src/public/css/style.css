@@ -23,13 +23,50 @@
   font-feature-settings: 'liga';
 }
 
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .custom-card {
   text-align: center; 
+  box-shadow: 0 0 4px rgba(0,0,0,.05);
+  transition: all .2s ease-in-out;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+.custom-card:hover {
+  transition: all .2s ease-in-out;
+  box-shadow: 0 0 7px rgba(0,0,0,.125);
 }
 .custom-card .icon { 
+  background-color: #eee;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .custom-card .icon span {
-  font-size: 48px;
+  font-size: 42px;
   color: #aaa;
+}
+.custom-card .card-title {
+  font-size: 1rem;
+}
+.custom-card .card-text { 
+  font-size: 0.8rem;
+}
+.custom-card .btn {
+  display: block;
+  margin: -1rem;
+  border-radius: 0;
+  margin-top: 1rem;
+  border: 0;
+  background: #f7f7fa;
+  padding: 8px 0;
+  border-top: 1px solid #e0e0e7;
 }
