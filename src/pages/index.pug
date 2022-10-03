@@ -40,7 +40,7 @@ block main
               h5(class="card-title") Acórdãos / ano
 
               p(class="card-text") Total de acórdãos por ano (ou período)
-              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+              a(href="/acordao-ano", class="btn btn-outline-primary btn-sm") Ver dados
 
         div(class="col mb-4")
           div(class="card custom-card")
@@ -50,7 +50,7 @@ block main
               h5(class="card-title") Acórdãos / relator
 
               p(class="card-text") Acórdãos agrupados por relatores
-              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+              a(href="/acordao-relator", class="btn btn-outline-primary btn-sm") Ver dados
 
         div(class="col mb-4")
           div(class="card custom-card")
@@ -60,7 +60,7 @@ block main
               h5(class="card-title") Acórdãos / relator / ano
 
               p(class="card-text") Acórdãos de um relator agrupados por ano
-              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+              a(href="/acordao-relator?byName=true", class="btn btn-outline-primary btn-sm") Ver dados
 
         div(class="col mb-4")
           div(class="card custom-card")
@@ -70,7 +70,7 @@ block main
               h5(class="card-title") Acórdãos / redator
 
               p(class="card-text") Acórdãos agrupados por redatores
-              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+              a(href="/acordao-redator", class="btn btn-outline-primary btn-sm") Ver dados
 
       div(class="row")
         div(class="col mb-4")
@@ -80,7 +80,7 @@ block main
                 span(class="material-icons") equalizer
               h5(class="card-title") Acórdãos / redator / ano
               p(class="card-text") Acórdãos de um redator agrupados por ano
-              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+              a(href="/acordao-redator?byName=true", class="btn btn-outline-primary btn-sm") Ver dados
 
         div(class="col mb-4")
           div(class="card custom-card")
@@ -89,7 +89,7 @@ block main
                 span(class="material-icons") pie_chart
               h5(class="card-title") Acórdãos / Órgão 
               p(class="card-text") Acórdãos agrupados pelo Órgão julgador
-              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+              a(href="/acordao-orgao", class="btn btn-outline-primary btn-sm") Ver dados
 
         div(class="col mb-4")
           div(class="card custom-card")
@@ -99,8 +99,7 @@ block main
               h5(class="card-title") Acórdãos / Órgão / ano
 
               p(class="card-text") Acórdãos agrupados por Órgão julgador e ano
-              //- a(href="#", class="btn btn-primary") Go somewhere
-              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+              a(href="/acordao-orgao-ano", class="btn btn-outline-primary btn-sm") Ver dados
 
         div(class="col mb-4")
           div(class="card custom-card")
@@ -110,18 +109,18 @@ block main
               h5(class="card-title") Acórdãos / categoria
 
               p(class="card-text") Acordãos agrupados por tipo de documento
-              a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+              a(href="/acordao-categoria", class="btn btn-outline-primary btn-sm") Ver dados
 
       div(class="row")
       div(class="col-3")
         div(class="card custom-card")
           div(class="card-body")
             div(class="icon")
-              span(class="material-icons") equalizer
+              span(class="material-icons") area_chart
 
             h5(class="card-title") Acórdãos / categoria / ano
             p(class="card-text") Grupos por tipo de documento e ano
-            a(href="#", class="btn btn-outline-primary btn-sm") Ver dados
+            a(href="/acordao-categoria?startAt=2022&endAt=2022", class="btn btn-outline-primary btn-sm") Ver dados
     
     div(class="section-title border-bottom pb-2 mb-4 mt-4")
       h3 Decisões
