@@ -4,3 +4,5 @@ export { JudicialBodyByYearQuery } from './judicial-body-by-year.query';
 export { JudgementsByWriterQuery } from './judgements-by-writer.query';
 export { JudgementsByRappoteurQuery } from './judgements-by-rappoteur.query';
 export { JudgementsByLocationCountQuery } from './judgements-by-location-count.query';
+export { JudgementsByDocumentCategoryCountQuery } from './judgements-by-document-category-count.query';
+export { JudgementsByDocumentCategoryYearQuery } from './judgements-by-document-category-year.query';
