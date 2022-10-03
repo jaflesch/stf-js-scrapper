@@ -2,6 +2,7 @@ import { Query } from "../domain/query";
 import { Judgement } from "../../models/judgement.model";
 import { QueryBuilder } from "../../query-builder";
 import { MongoDBPipeline } from "../infra/mongodb-pipeline.type";
+import { getMonthName } from "../infra/get-month-name";
 
 type Params = {
   name?: string;
@@ -21,10 +22,10 @@ type ResultDTO = Array<{
 
 export class JudgementsByWriterQuery implements Query <Params, ResultDTO> {
   public async execute(queryParams: Params): Promise<ResultDTO> {
-    const { group, match } = this.mountQueryParams(queryParams);
+    const { group, match, sort } = this.mountQueryParams(queryParams);
     const qb = new QueryBuilder(Judgement).$();    
     
-    const result: ResultDTO = await qb.aggregate([
+    const rows: ResultDTO = await qb.aggregate([
       {
         $addFields: {
           year: {
@@ -37,6 +38,9 @@ export class JudgementsByWriterQuery implements Query <Params, ResultDTO> {
       },
       { 
         $match: { 
+          redator: {
+            $exists: true 
+          },
           ...match 
         }
       },
@@ -44,7 +48,6 @@ export class JudgementsByWriterQuery implements Query <Params, ResultDTO> {
         $group: {
           _id: {
             writer: "$redator",
-            year: "$year",
             ...group?._id
           },
           count: { $sum: 1 }
@@ -61,16 +64,27 @@ export class JudgementsByWriterQuery implements Query <Params, ResultDTO> {
       },      
       {
         $sort: {
-          year: 1,
-          month: 1,
-        },
+          ...sort,
+        }
       }
     ]);
+
+    const result: ResultDTO = rows.map(row => {
+      return {
+        count: row.count,
+        year: row.year,
+        month: row.month,
+        writer: row.writer,
+        isPresident: row.isPresident,
+        monthName: row.month ? getMonthName(row.month) : '',
+      };
+    });
 
     return result;
   }
 
   private mountQueryParams (queryParams: Params): MongoDBPipeline {
+    let sort: MongoDBPipeline['sort'] = {};
     const match: MongoDBPipeline['match'] = {};
     const group: MongoDBPipeline['group'] = {
       _id: []
@@ -93,19 +107,22 @@ export class JudgementsByWriterQuery implements Query <Params, ResultDTO> {
     }
     if (queryParams.name) {
       match.redator = queryParams.name;
-    } else {
-      match.redator = {
-        $exists: true
-      };
     }
     if (!!queryParams.isPresident) {      
       match.redatorPresidente = true;
+    }
+
+    if (queryParams.startAt || queryParams.endAt || queryParams.name) {
+      group._id = {
+        year: "$year",
+      }
     }
 
     if (queryParams.startAt && queryParams.endAt) {
       const sameYear = (Number(queryParams.startAt) - Number(queryParams.endAt)) === 0;
       if (sameYear) {
         group._id = {
+          ...group._id,
           month: "$month" 
         };
       }
@@ -115,6 +132,17 @@ export class JudgementsByWriterQuery implements Query <Params, ResultDTO> {
       match.$and = yearMatch;
     }
 
-    return { match, group }
+    if (group._id?.length === 0) {
+      sort = {
+        count: -1
+      }
+    } else {
+      sort = {
+        year: 1,
+        month: 1,
+      }
+    }
+    
+    return { match, group, sort }
   }
 }

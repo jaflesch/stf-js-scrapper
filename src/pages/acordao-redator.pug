@@ -18,8 +18,18 @@ block chart
         color: '#FE777B'
       });
 
+      const queryName = location.search.match(/name/)?.length;
+      Chart.register(ChartDataLabels);
+
       const dt = !{ chart };
-      const labels = dt.map(d => d.writer);
+      console.log(queryName, dt);
+      const labels = dt.map(d => queryName 
+        ? (
+          d.monthName 
+          ? `${d.monthName.slice(0,3)} / ${d.year}`
+          : d.year
+        ) : d.writer
+      );
 
       const data = {
         labels,
@@ -31,26 +41,57 @@ block chart
           borderAlign: 'inner',
           data: dt.map(d => d.count),
           datalabels: {
-            color: '#ff0000'
+            color: '#000',
+            anchor: 'end',
+            align: 'end',
           }
         }]
       };
+
+      const axisConfig = !!queryName ? {} : {
+        indexAxis: 'y',
+        scales: {
+          y: {
+            ticks: {
+              crossAlign: 'far',
+            }
+          }
+        },
+      }
 
       const config = {
         type: 'bar',
         data: data,
         options: {
-          responsive: true,
+          ...axisConfig,
+          barPercentage: 0.8,
+          categoryPercentage: 0.8,
+          maintainAspectRatio: !!queryName,
           plugins: {
             legend: {
-              position: 'right',
               display: false,
             },
             title: {
-              display: true,
-              text: 'Acórdãos / Ano'
+              display: !!queryName,
+              text: new URLSearchParams(location.search).get('name'),
             },
           },
+          scales: {
+            x: {
+              grid: {
+                color: '#f0f0f0',
+                borderColor: 'gray',
+                tickColor: 'gray',
+              }
+            },
+            y: {
+              grid: {
+                color: '#e0e0e0',
+                borderColor: 'gray',
+                tickColor: 'gray',
+              }
+            }
+          }
         },
         tooltips: {
           enabled: false
@@ -72,6 +113,8 @@ block chart
           }
         }
       };
+
+      $('#myChart').parent().attr('style', queryName ? "width:90%; height:auto;" : "width:100%;height:100vh");
 
       const myChart = new Chart(
         $('#myChart'), config
