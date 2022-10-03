@@ -7,21 +7,29 @@ append title
     title= (page_title || 'LEAF | UFRGS 2022')
 
 block chart 
-  div(style="width:80%; height:auto;")
+  div#chart-labels(style=`
+    display:none; 
+    padding: 8px; 
+    border:1px solid #ddd;
+    align-items: center;
+    justify-content: center;
+    gap:16px;
+    width:fit-content;
+    margin: 0 auto 1rem;
+  `)
+  div(style="width:90%; height:auto;")
     canvas#myChart 
     div 
       p#chart
   
   script.
     $(document).ready(() => {
-      Chart.defaults.set('plugins.datalabels', {
-        color: '#FE777B'
-      });
-
+      Chart.register(ChartDataLabels);
       const dt = !{ chart };
-
-      const datasetGroups = {};
       const labelYears = {};      
+      const datasetGroups = {};
+      const colors =['#66358f', '#cada3e', '#4771b5'];
+
       for (const d of dt) {
         if (labelYears[d.year] === undefined) {
           labelYears[d.year] = 1;
@@ -44,18 +52,42 @@ block chart
       const datasets = [
         {
           label: groupKeys[0],
-          backgroundColor: 'magenta',
+          backgroundColor: colors[0],
           data: datasetGroups[groupKeys[0]],
+          datalabels: {
+            color: '#fff',
+            anchor: 'center',
+            align: 'center',
+            font: {
+              size: 11,
+            }
+          },
         },
         {
           label: groupKeys[1],
-          backgroundColor: 'cyan',
+          backgroundColor: colors[1],
           data: datasetGroups[groupKeys[1]],
+          datalabels: {
+            color: '#000',
+            anchor: 'center',
+            align: 'center',
+            font: {
+              size: 11,
+            }
+          }
         },
        {
           label: groupKeys[2],
-          backgroundColor: 'yellow',
+          backgroundColor:  colors[2],
           data: datasetGroups[groupKeys[2]],
+          datalabels: {
+            color: '#fff',
+            anchor: 'center',
+            align: 'center',
+            font: {
+              size: 11,
+            }
+          }
         },
       ];
 
@@ -67,14 +99,20 @@ block chart
           responsive: true,
           plugins: {
             legend: {
-              position: 'right',
-              display: true,
+              display: false,
             },
             title: {
-              display: true,
-              text: 'Acórdãos / Ano'
+              display: false,
             },
           },
+          scales: {
+            x: {
+              stacked: true,
+            },
+            y: {
+              stacked: true
+            }
+          }
         },
         tooltips: {
           enabled: false
@@ -100,5 +138,17 @@ block chart
       const myChart = new Chart(
         $('#myChart'), config
       );  
+
+      const keys = Object.keys(datasetGroups).filter(k => !!k);
+      $('#chart-labels').html(
+        keys.map((l, i) => {
+          return `
+            <div style="display:flex;gap: 8px;align-items: center;">
+              <div style='background-color:${colors[i]};width:28px;height:28px;'></div>
+              <span style='font-size: 14px;font-weight: 600'>${keys[i]}</span>
+            </div>
+          `;
+        }).join('')
+      ).show().css('display', 'flex');          
     });
     
