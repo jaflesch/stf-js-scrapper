@@ -7,65 +7,68 @@ append title
     title= (page_title || 'LEAF | UFRGS 2022')
 
 block chart 
-  div(style="display:flex;align-items:center;flex-direction:column;")
+  div(style="display:flex;flex-direction:column;")
     div#filter(style="align-self:flex-start")
       form
         div(class="row align-items-end")
           div.col-auto 
-            label(for="startAt", class="small") De:
-            input(id="start-at" class="form-control", type="number", name="startAt", min="1893", max="2022", placeholder="1893")
-
-          div.col-auto 
-            label(for="startAt", class="small") Até:
-            input(id="end-at" class="form-control", type="number", name="endAt", min="1893", max="2022", placeholder="2022")
+            label(for="startAt", class="small") Categoria:
+            select(id="category" class="form-control" name="category")
+              each category in categories 
+                option(value=category.key) #{category.value}
             
           div.col-auto 
             button(class="btn btn-primary") Pesquisar
+    
     hr(style="width:100%; border-color:#aaa;")
-    div(style=(Number(limit) > 0 ? "width:75%;" : "height:150vh;width:100%"))
+
+    div(style="width:80%;margin:0;")
       canvas#myChart 
+    
     div
       div#chart-labels(style='display:none; padding: 8px; border:1px solid #ddd;')
+  
   script.
     $(document).ready(() => {
       const urlParams = new URLSearchParams(location.search);
       Chart.register(ChartDataLabels);
-
       const dt = !{ chart };
       const chartData = dt.map(d => d.count);
-      const labels = dt.map(d => d.categoryLabel);
+      const labels = dt.map(d => d.year);
       const colors = ['#4771b5'];  
       const hasYear = Number(urlParams.get('startAt')) > 0;
+      const maxValue = Math.max(...chartData);
 
-      $('#end-at').val(urlParams.get('endAt'));
-      $('#start-at').val(urlParams.get('startAt'));
+      $('#category').val(urlParams.get('category'));
 
       const data = {
         labels,
         datasets: [{
           label: 'Acórdãos',
-          backgroundColor: colors,
-          borderWidth: 0,
-          borderAlign: 'outer',
-          data: chartData,          
+          borderWidth: 2,
+          tension: 0.25,     
+          showLine: true,
+          lineColor: colors[0],
+          borderColor: colors[0],
+          data: chartData,     
+          pointBackgroundColor:  colors[0],
+          fill: true,
+          backgroundColor: '#4771b540',
         }]
       };
 
       const config = {
         data,
-        type: 'bar',
+        type: 'line',
         options: {
-          indexAxis: 'y',
           scales: {
             y: {
-              ticks: {
-                crossAlign: 'far',
-              }
+              suggestedMin: 0,
+              suggestedMax: maxValue + Math.floor(maxValue / labels.length)
             }
           },
-          barPercentage: 0.8,
-          categoryPercentage: 0.8,
           maintainAspectRatio: true,
+          poinBackgroundColor: 'red',
           plugins: {
             legend: {
               display: false
