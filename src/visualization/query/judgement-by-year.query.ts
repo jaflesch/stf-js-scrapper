@@ -18,7 +18,7 @@ type Result = Array<{
 
 export class JudgementsByYearQuery implements Query <Params, Result> {
   public async execute(queryParams: Params) {
-    const { match } = this.mountQueryParams(queryParams);
+    const { match, group } = this.mountQueryParams(queryParams);
     const qb = new QueryBuilder(Judgement).$();
 
     const rows = await qb.aggregate([
@@ -38,8 +38,8 @@ export class JudgementsByYearQuery implements Query <Params, Result> {
       {
         $group: {
           _id: {
-            month: { $month: "$dataJulgamento" },
-            year: { $year: "$dataJulgamento" }
+            year: { $year: "$dataJulgamento" },
+            ...group?._id
           },
           count: { $sum: 1 }
         }
@@ -74,7 +74,7 @@ export class JudgementsByYearQuery implements Query <Params, Result> {
 
   private mountQueryParams (queryParams: Params): MongoDBPipeline {
     const match: MongoDBPipeline['match'] = {};
-    const project: MongoDBPipeline['project'] = {};
+    const group: MongoDBPipeline['group'] = {};
     const yearMatch = [];
 
     if (queryParams.startAt) {
@@ -92,6 +92,19 @@ export class JudgementsByYearQuery implements Query <Params, Result> {
       });
     }
 
-    return { match, project }
+    if (queryParams.startAt && queryParams.endAt) {
+      const sameYear = (Number(queryParams.startAt) - Number(queryParams.endAt)) === 0;
+      if (sameYear) {
+        group._id = {
+          month: "$month" 
+        };
+      }
+    }
+
+    if (yearMatch.length > 0) {
+      match.$and = yearMatch;
+    }
+
+    return { match, group }
   }
 }

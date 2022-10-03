@@ -14,12 +14,10 @@ block chart
   
   script.
     $(document).ready(() => {
-      Chart.defaults.set('plugins.datalabels', {
-        color: '#FE777B'
-      });
+      Chart.register(ChartDataLabels);
 
       const dt = !{ chart };
-      const labels = dt.map(d => `${d.monthName.slice(0,3)}/${d.year}`);
+      const labels = dt.map(d => `${d.monthName ? (d.monthName.slice(0,3) / d.year) : d.year}`);
 
       const data = {
         labels,
@@ -31,7 +29,9 @@ block chart
           borderAlign: 'inner',
           data: dt.map(d => d.count),
           datalabels: {
-            color: '#ff0000'
+            color: '#000',
+            anchor: 'end',
+            align: 'end',
           }
         }]
       };
@@ -43,14 +43,28 @@ block chart
           responsive: true,
           plugins: {
             legend: {
-              position: 'right',
               display: false,
             },
             title: {
-              display: true,
-              text: 'Acórdãos / Ano'
+              display: false,
             },
           },
+          scales: {
+            x: {
+              grid: {
+                color: '#f0f0f0',
+                borderColor: 'gray',
+                tickColor: 'gray',
+              }
+            },
+            y: {
+              grid: {
+                color: '#e0e0e0',
+                borderColor: 'gray',
+                tickColor: 'gray',
+              }
+            }
+          }
         },
         tooltips: {
           enabled: false
