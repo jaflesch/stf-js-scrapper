@@ -3,10 +3,7 @@ extends templates/home
 block variables 
   - var page_title = 'Exemplo';
 
-append head_scripts 
-  link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
-  link(href='/public/css/style.css', rel="stylesheet")
-  
+append head_scripts   
   script.
     $(document).ready(() => {
       $('.section-title button').on("click", function() {
@@ -120,7 +117,7 @@ block main
 
             h5(class="card-title") Acórdãos / categoria / ano
             p(class="card-text") Grupos por tipo de documento e ano
-            a(href="/acordao-categoria?startAt=2022&endAt=2022", class="btn btn-outline-primary btn-sm") Ver dados
+            a(href="/acordao-categoria-ano?startAt=2022&endAt=2022", class="btn btn-outline-primary btn-sm") Ver dados
     
     div(class="section-title border-bottom pb-2 mb-4 mt-4")
       h3 Decisões

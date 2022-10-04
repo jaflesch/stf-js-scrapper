@@ -14,6 +14,7 @@ block chart
           div.col-auto 
             label(for="startAt", class="small") Categoria:
             select(id="category" class="form-control" name="category")
+              option(value='-1') Selecione uma categoria
               each category in categories 
                 option(value=category.key) #{category.value}
             
@@ -25,87 +26,110 @@ block chart
     div(style="width:80%;margin:0;")
       canvas#myChart 
     
+    div#no-chart(style="display:none;")
+      div.alert.alert-info(style='display:flex; align-items:center; gap:8px') 
+        span.material-icons info
+        p(style="margin:0;") Nenhum resultado para a categoria selecionada
+
+    div#no-data(style="display:none;")
+      div.alert.alert-warning(style='display:flex; align-items:center; gap:8px') 
+        span.material-icons warning
+        p(style="margin:0;") É necessário selecionar uma categoria de acórdão
+
     div
       div#chart-labels(style='display:none; padding: 8px; border:1px solid #ddd;')
   
   script.
     $(document).ready(() => {
-      const urlParams = new URLSearchParams(location.search);
-      Chart.register(ChartDataLabels);
       const dt = !{ chart };
-      const chartData = dt.map(d => d.count);
-      const labels = dt.map(d => d.year);
-      const colors = ['#4771b5'];  
-      const hasYear = Number(urlParams.get('startAt')) > 0;
-      const maxValue = Math.max(...chartData);
+      const urlParams = new URLSearchParams(location.search);
 
-      $('#category').val(urlParams.get('category'));
+      if (urlParams.get('category') === '-1') {
+        $('#myChart').remove();
+        $('#no-data').show();
+        $('#category').val("-1");
+      } 
+      else if (dt.length === 0) {
+        $('#myChart').remove();
+        $('#no-chart').show();
+        $('#category').val(urlParams.get('category'));
+      } 
+      else {
+        Chart.register(ChartDataLabels);
+        const dt = !{ chart };
+        const chartData = dt.map(d => d.count);
+        const labels = dt.map(d => d.year);
+        const colors = ['#4771b5'];  
+        const hasYear = Number(urlParams.get('startAt')) > 0;
+        const maxValue = Math.max(...chartData);
 
-      const data = {
-        labels,
-        datasets: [{
-          label: 'Acórdãos',
-          borderWidth: 2,
-          tension: 0.25,     
-          showLine: true,
-          lineColor: colors[0],
-          borderColor: colors[0],
-          data: chartData,     
-          pointBackgroundColor:  colors[0],
-          fill: true,
-          backgroundColor: '#4771b540',
-        }]
-      };
+        $('#category').val(urlParams.get('category'));
+        const data = {
+          labels,
+          datasets: [{
+            label: 'Acórdãos',
+            borderWidth: 2,
+            tension: 0.25,     
+            showLine: true,
+            lineColor: colors[0],
+            borderColor: colors[0],
+            data: chartData,     
+            pointBackgroundColor:  colors[0],
+            fill: true,
+            backgroundColor: '#4771b540',
+          }]
+        };
 
-      const config = {
-        data,
-        type: 'line',
-        options: {
-          scales: {
-            y: {
-              suggestedMin: 0,
-              suggestedMax: maxValue + Math.floor(maxValue / labels.length)
-            }
-          },
-          maintainAspectRatio: true,
-          poinBackgroundColor: 'red',
-          plugins: {
-            legend: {
-              display: false
-            },
-            title: { 
-              display: false 
-            },
-            datalabels: {
-              anchor: 'end',
-              align: 'end',
-              formatter: (val) => val,
-              labels: {
-                value: {
-                  color: '#000'
-                }
+        const config = {
+          data,
+          type: 'line',
+          options: {
+            scales: {
+              y: {
+                suggestedMin: 0,
+                suggestedMax: maxValue + Math.floor(maxValue / labels.length)
               }
             },
+            maintainAspectRatio: true,
+            poinBackgroundColor: 'red',
+            plugins: {
+              legend: {
+                display: false
+              },
+              title: { 
+                display: false 
+              },
+              datalabels: {
+                anchor: 'end',
+                align: 'end',
+                formatter: (val) => val,
+                labels: {
+                  value: {
+                    color: '#000'
+                  }
+                }
+              },
+            },
           },
-        },
-        tooltips: {
-          enabled: false
-        },
-      };
+          tooltips: {
+            enabled: false
+          },
+        };
 
-      const myChart = new Chart(
-        $('#myChart'), config
-      );
+        const myChart = new Chart(
+          $('#myChart'), config
+        );
 
-      $('#chart-labels').html(
-        labels.map((l, i) => {
-          return `
-            <div style="display:flex;gap: 8px;margin-bottom: ${(i === labels.length - 1) ? 0 : '8px'}; align-items: center;">
-              <div style='background-color:${colors[i % colors.length]};width:28px;height:28px;'></div>
-              <span style='font-size: 14px;font-weight: 600'>${l} (${chartData[i]})</span>
-            </div>
-          `;
-        }).join('')
-      );    
+        $('#chart-labels').html(
+          labels.map((l, i) => {
+            return `
+              <div style="display:flex;gap: 8px;margin-bottom: ${(i === labels.length - 1) ? 0 : '8px'}; align-items: center;">
+                <div style='background-color:${colors[i % colors.length]};width:28px;height:28px;'></div>
+                <span style='font-size: 14px;font-weight: 600'>${l} (${chartData[i]})</span>
+              </div>
+            `;
+          }).join('')
+        );  
+      }
     });
     
