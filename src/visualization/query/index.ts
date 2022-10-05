@@ -6,4 +6,4 @@ export { JudgementsByRappoteurQuery } from './judgements-by-rappoteur.query';
 export { JudgementsByLocationCountQuery } from './judgements-by-location-count.query';
 export { JudgementsByDocumentCategoryCountQuery } from './judgements-by-document-category-count.query';
 export { JudgementsByDocumentCategoryYearQuery } from './judgements-by-document-category-year.query';
-export { JudgementsByDecistionTypeQuery } from './judgements-by-decision-type.query';
+export { JudgementsByDecisionTypeQuery } from './judgements-by-decision-type.query';

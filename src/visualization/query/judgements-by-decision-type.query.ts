@@ -7,6 +7,7 @@ import { getMonthName } from "../infra/get-month-name";
 type Params = {
   startAt?: Date;
   endAt?: Date;
+  groupByYear?: boolean;
 }
 
 type ResultDTO = Array<{
@@ -18,7 +19,7 @@ type ResultDTO = Array<{
   monthName?: string;
 }>
 
-export class JudgementsByDecistionTypeQuery implements Query <Params, ResultDTO> {
+export class JudgementsByDecisionTypeQuery implements Query <Params, ResultDTO> {
   public async execute(queryParams: Params): Promise<ResultDTO> {
     const { group, match, sort } = this.mountQueryParams(queryParams);
     const qb = new QueryBuilder(Judgement).$();    
@@ -104,7 +105,7 @@ export class JudgementsByDecistionTypeQuery implements Query <Params, ResultDTO>
       });
     }
 
-    if (queryParams.startAt || queryParams.endAt) {
+    if (queryParams.groupByYear) {
       group._id = {
         year: "$year",
       }
