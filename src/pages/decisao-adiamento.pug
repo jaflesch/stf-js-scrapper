@@ -1,0 +1,82 @@
+extends templates/layout
+
+block variables 
+  - var page_title = 'Decisão adiada';
+
+append title 
+    title= page_title
+
+block chart 
+  div(style="display:flex;align-items:center; gap: 32px")
+    div(style='width:600px; height:auto;')
+      canvas#myChart 
+    div
+      div#chart-labels(style='display:none; padding: 8px; border:1px solid #ddd;')
+  
+  script.
+    $(document).ready(() => {
+      Chart.register(ChartDataLabels);
+      const dt = !{ chart };
+      const colors = ['#4771b5', '#da3e3e'];      
+      const filteredDataset = dt.filter(d => d.judicialBody !== null);
+
+      const chartData = filteredDataset.map(d => d.count);
+      const labels = filteredDataset.map(d => d.decisionText);
+      
+      const data = {
+        labels,
+        datasets: [{
+          label: 'Acórdãos',
+          backgroundColor: colors,
+          borderWidth: 0,
+          data: chartData,
+          datalabels: {
+            anchor: 'center',
+            color: '#fff',
+            align: 'center',
+            font: {
+              size: 12,
+            }
+          }
+        }]
+      };
+
+      const config = {
+        data,
+        type: 'doughnut',
+        options: {
+          hover: { mode: null },
+          responsive: true,
+          plugins: {
+            labels: {
+              render: 'percentage',
+              fontColor: ['green', 'white', 'red'],
+              precision: 2
+            },
+            legend: {
+              display: false
+            },
+            title: { 
+              display: false 
+            },
+          },
+        },
+        showTooltips: false,
+      };
+
+      const myChart = new Chart(
+        $('#myChart'), config
+      );
+
+      $('#chart-labels').html(
+        labels.map((l, i) => {
+          return `
+            <div style="display:flex;gap: 8px;margin-bottom: ${(i === labels.length - 1) ? 0 : '8px'}; align-items: center;">
+              <div style='background-color:${colors[i]};width:28px;height:28px;'></div>
+              <span style='font-size: 14px;font-weight: 600'>${l} (${chartData[i]})</span>
+            </div>
+          `;
+        }).join('')
+      ).show();      
+    });
+    

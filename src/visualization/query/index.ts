@@ -7,3 +7,4 @@ export { JudgementsByLocationCountQuery } from './judgements-by-location-count.q
 export { JudgementsByDocumentCategoryCountQuery } from './judgements-by-document-category-count.query';
 export { JudgementsByDocumentCategoryYearQuery } from './judgements-by-document-category-year.query';
 export { JudgementsByDecisionTypeQuery } from './judgements-by-decision-type.query';
+export { JudgementsByDecisionDelayedQuery }  from './judgements-by-decision-delayed.query';
