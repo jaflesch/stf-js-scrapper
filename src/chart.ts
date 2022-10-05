@@ -1,8 +1,8 @@
-import * as cherrio from "cheerio";
 import fs from 'fs';
-import  pdf from 'pdf-parse';
+import pdf from 'pdf-parse';
 import path, { dirname } from 'path';
 import express, {Request, Response} from 'express';
+import * as cherrio from "cheerio";
 import { normalizeAverageValue } from './visualization/infra/normalize-avg-value';
 import { 
   JudgementsByYearQuery,
@@ -11,9 +11,15 @@ import {
   JudicialBodyByYearQuery, 
   JudgementsByRappoteurQuery,
   JudgementsByLocationCountQuery,
+  JudgementsByDocumentCategoryYearQuery,
   JudgementsByDocumentCategoryCountQuery,
+  JudgementsByDecisionTypeQuery,
+  JudgementsByDecisionDelayedQuery,
 } from './visualization/query';
 import { removeStopwords, porBr } from 'stopword';
+import { DocumentCategory } from "./visualization/infra/document-category.enum";
+import { DocumentCategoryLabel } from "./visualization/infra/document-category-label.enum";
+
 const pdf2html = require('pdf2html');
 
 const app = express();
@@ -61,7 +67,7 @@ router.get('/acordao-ano', async ({ query }: Request, res: Response) => {
   const chart = await judgementsByYearsQuery.execute(query);
   
   res.render("acordao-ano", { 
-    chartTitle: 'Acordãos por período',
+    chartTitle: 'Acordãos por ano',
     chart: JSON.stringify(chart) 
   });
 });
@@ -86,7 +92,7 @@ router.get('/acordao-redator', async ({ query }: Request, res: Response) => {
   });
 });
 
-router.get('/orgao-ano', async ({ query }: Request, res: Response) => {
+router.get('/acordao-orgao-ano', async ({ query }: Request, res: Response) => {
   const judicialBodyByYearQuery = new JudicialBodyByYearQuery();
   const chart = await judicialBodyByYearQuery.execute(query);
   
@@ -96,11 +102,11 @@ router.get('/orgao-ano', async ({ query }: Request, res: Response) => {
   });
 });
 
-router.get('/votos-orgao', async (_req: Request, res: Response) => {
+router.get('/acordao-orgao', async (_req: Request, res: Response) => {
   const judicialBodyCountQuery = new JudicialBodyCountQuery();
   const chart = await judicialBodyCountQuery.execute();
   
-  res.render("votos-orgao", { 
+  res.render("acordao-orgao", { 
     chartTitle: 'Total acõrdãos / Órgão julgador',
     chart: JSON.stringify(chart) 
   });
@@ -129,11 +135,81 @@ router.get('/acordao-categoria', async ({ query }: Request, res: Response) => {
   const chart = await judgementsByDocumentCategoryCountQuery.execute(query);
 
   res.render("acordao-categoria", { 
-    chartTitle: 'Total acõrdãos / Categoria',
+    chartTitle: 'Total acórdãos / categoria',
     chart: JSON.stringify(chart),
   });
 });
 
+router.get('/acordao-categoria-ano', async ({ query }: Request, res: Response) => {
+  const judgementsByDocumentCategoryYearQuery = new JudgementsByDocumentCategoryYearQuery();
+  const chart = await judgementsByDocumentCategoryYearQuery.execute(query);
+
+  const categories = [];
+  const dcKeys = Object.values(DocumentCategory);
+  const dcLabels = Object.values(DocumentCategoryLabel);
+
+  for (let i = 0; i < dcKeys.length; i++) {
+    categories.push({
+      key: dcKeys[i],
+      value: dcLabels[i],
+    });
+  }
+
+  res.render("acordao-categoria-ano", { 
+    chartTitle: 'Total acõrdãos / categoria / ano',
+    categories: categories,
+    chart: JSON.stringify(chart),
+  });
+});
+
+router.get('/decisao-tipo', async({ query}: Request, res: Response) => {
+  const judgementsByDecisonTypeQuery = new JudgementsByDecisionTypeQuery();
+  const chart = await judgementsByDecisonTypeQuery.execute(query);
+
+  res.render("decisao-tipo", { 
+    chartTitle: 'Tipo de decisão',
+    chart: JSON.stringify(chart),
+  });
+});
+
+router.get('/decisao-tipo-ano', async({ query}: Request, res: Response) => {
+  const judgementsByDecisonTypeByYearQuery = new JudgementsByDecisionTypeQuery();
+  const chart = await judgementsByDecisonTypeByYearQuery.execute({
+    ...query,
+    groupByYear: true,
+  });
+
+  res.render("decisao-tipo-ano", { 
+    chartTitle: 'Tipo de decisão / ano',
+    chart: JSON.stringify(chart),
+  });
+});
+
+router.get('/decisao-adiamento', async({ query}: Request, res: Response) => {
+  const judgementsByDecisonDelayedQuery = new JudgementsByDecisionDelayedQuery();
+  const chart = await judgementsByDecisonDelayedQuery.execute(query);
+
+  res.render("decisao-adiamento", { 
+    chartTitle: 'Decisão adiada',
+    chart: JSON.stringify(chart),
+  });
+});
+
+router.get('/decisao-adiamento-ano', async({ query}: Request, res: Response) => {
+  const judgementsByDecisonDelayedQuery = new JudgementsByDecisionDelayedQuery();
+  const chart = await judgementsByDecisonDelayedQuery.execute({
+    ...query,
+    groupByYear: true,
+  });
+
+  res.render("decisao-adiamento-ano", { 
+    chartTitle: 'Decisão adiada / ano',
+    chart: JSON.stringify(chart),
+  });
+});
+
+
+////////////////////////////////////////
 router.get('/pdf', async (req: Request, res: Response) => {
   const f = __dirname + '/acordao.pdf'
   let dataBuffer = fs.readFileSync(f);
