@@ -8,4 +8,6 @@ export { JudgementsByDocumentCategoryCountQuery } from './judgements-by-document
 export { JudgementsByDocumentCategoryYearQuery } from './judgements-by-document-category-year.query';
 export { JudgementsByDecisionTypeQuery } from './judgements-by-decision-type.query';
 export { JudgementsByDecisionDelayedQuery }  from './judgements-by-decision-delayed.query';
+export { VotesByJudgementQuery } from './votes-by-judgement.query';
 export { VotesByMinisterQuery } from './votes-by-minister.query';
+export { VotesMonocraticByYearQuery } from './votes-monocratic-by-year.query';

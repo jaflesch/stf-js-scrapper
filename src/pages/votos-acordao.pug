@@ -1,0 +1,95 @@
+extends templates/layout
+
+block variables 
+  - var page_title = 'Decisão adiada';
+
+append title 
+    title= page_title
+
+block chart 
+  div(style="display:flex;align-items:center; gap: 32px")
+    div(style='width:600px; height:auto;')
+      canvas#myChart 
+    div
+      div#chart-labels(style='display:none; padding: 8px; border:1px solid #ddd;')
+  
+  script.
+    $(document).ready(() => {
+      Chart.register(ChartDataLabels);
+      //const dt = !{ chart };
+      const dt = [
+        {votes: 1, count: 460},
+        {votes: 2, count: 240},
+        {votes: 3, count: 102},
+        {votes: 4, count: 55},
+        {votes: 5, count: 49},
+        {votes: 6, count: 24},
+        {votes: 7, count: 7},
+        {votes: 8, count: 6},
+        {votes: 9, count: 7},
+        {votes: 10, count: 4},
+        {votes: 11, count: 2},
+      ]
+      const colors = ['#1a76d2', '#5eb7f5', '#ef6c00', '#ffd54f', '#465a65', '#96a6a6', '#dd2c00', '#eb8369', '#00858f', '#01bfa5', '#ffa200', '#ffb638', '#831ad2', '#a558de'];      
+      const filteredDataset = dt.filter(d => d.votes !== null);
+
+      const chartData = filteredDataset.map(d => d.count);
+      const labels = filteredDataset.map(d => d.votes);
+      
+      const data = {
+        labels,
+        datasets: [{
+          label: 'Acórdãos',
+          backgroundColor: colors,
+          borderWidth: 0,
+          data: chartData,
+          datalabels: {
+            anchor: 'center',
+            color: '#fff',
+            align: 'center',
+            font: {
+              size: 0,
+            }
+          }
+        }]
+      };
+
+      const config = {
+        data,
+        type: 'doughnut',
+        options: {
+          hover: { mode: null },
+          responsive: true,
+          plugins: {
+            labels: {
+              render: 'percentage',
+              fontColor: ['green', 'white', 'red'],
+              precision: 2
+            },
+            legend: {
+              display: false
+            },
+            title: { 
+              display: false 
+            },
+          },
+        },
+        showTooltips: false,
+      };
+
+      const myChart = new Chart(
+        $('#myChart'), config
+      );
+
+      $('#chart-labels').html(
+        labels.map((l, i) => {
+          return `
+            <div style="display:flex;gap: 8px;margin-bottom: ${(i === labels.length - 1) ? 0 : '8px'}; align-items: center;">
+              <div style='background-color:${colors[i]};width:28px;height:28px;'></div>
+              <span style='font-size: 14px;font-weight: 600'>${l} votos (${chartData[i]})</span>
+            </div>
+          `;
+        }).join('')
+      ).show();      
+    });
+    

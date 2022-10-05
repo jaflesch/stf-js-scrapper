@@ -10,12 +10,14 @@ import {
   JudgementsByWriterQuery,
   JudicialBodyByYearQuery, 
   JudgementsByRappoteurQuery,
+  JudgementsByDecisionTypeQuery,
   JudgementsByLocationCountQuery,
+  JudgementsByDecisionDelayedQuery,
   JudgementsByDocumentCategoryYearQuery,
   JudgementsByDocumentCategoryCountQuery,
-  JudgementsByDecisionTypeQuery,
-  JudgementsByDecisionDelayedQuery,
   VotesByMinisterQuery,
+  VotesByJudgementQuery,
+  VotesMonocraticByYearQuery,
 } from './visualization/query';
 import { removeStopwords, porBr } from 'stopword';
 import { DocumentCategory } from "./visualization/infra/document-category.enum";
@@ -197,14 +199,36 @@ router.get('/decisao-adiamento', async({ query}: Request, res: Response) => {
 });
 
 router.get('/votos-ministro', async({ query}: Request, res: Response) => {
-  const votesByMinistersQuery = new VotesByMinisterQuery();
-  const chart = await votesByMinistersQuery.execute(query);
+  const votesByMinisterQuery = new VotesByMinisterQuery();
+  const chart = await votesByMinisterQuery.execute(query);
 
   res.render("votos-ministro", { 
     chartTitle: 'Votos / ministro',
     chart: JSON.stringify(chart),
   });
 });
+
+router.get('/votos-monocraticos-ano', async({ query}: Request, res: Response) => {
+  const votesMonocraticByYearQuery = new VotesMonocraticByYearQuery();
+  const chart = await votesMonocraticByYearQuery.execute(query);
+
+  res.render("votos-monocraticos-ano", { 
+    chartTitle: 'Votos monocráticos / ano',
+    chart: JSON.stringify(chart),
+  });
+});
+
+router.get('/votos-acordao', async({ query}: Request, res: Response) => {
+  const votesByJudgementQuery = new VotesByJudgementQuery();
+  const chart = await votesByJudgementQuery.execute(query);
+
+  res.render("votos-acordao", { 
+    chartTitle: 'Votos / acórdão',
+    chart: JSON.stringify(chart),
+  });
+});
+
+
 
 
 ////////////////////////////////////////
