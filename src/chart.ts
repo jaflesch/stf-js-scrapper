@@ -115,24 +115,6 @@ router.get('/acordao-orgao', async (_req: Request, res: Response) => {
   });
 });
 
-router.get('/votos-local', async ({ query }: Request, res: Response) => {
-  const judgementsByLocationCountQuery = new JudgementsByLocationCountQuery();
-  const chart = await judgementsByLocationCountQuery.execute(query);
-  
-  if (query.limit) {
-    chart.items.push({
-      location: 'OUTROS',
-      count: chart.total,
-    });
-  }
-
-  res.render("votos-local", { 
-    limit: query.limit ?? -1,
-    chartTitle: 'Total acõrdãos / Local',
-    chart: JSON.stringify(chart),
-  });
-});
-
 router.get('/acordao-categoria', async ({ query }: Request, res: Response) => {
   const judgementsByDocumentCategoryCountQuery = new JudgementsByDocumentCategoryCountQuery();
   const chart = await judgementsByDocumentCategoryCountQuery.execute(query);
@@ -224,6 +206,29 @@ router.get('/votos-acordao', async({ query}: Request, res: Response) => {
 
   res.render("votos-acordao", { 
     chartTitle: 'Votos / acórdão',
+    chart: JSON.stringify(chart),
+  });
+});
+
+router.get('/local-federacao', async({ query }: Request, res: Response) => {
+  const judgementsByLocationCountQuery = new JudgementsByLocationCountQuery();
+  const chart = await judgementsByLocationCountQuery.execute({
+    ...query,
+    country: 'BR'
+  });
+  
+  res.render("local-federacao", { 
+    chartTitle: 'Acõrdãos / federação brasileira',
+    chart: JSON.stringify(chart),
+  });
+});
+
+router.get('/local-estado', async({ query }: Request, res: Response) => {
+  const votesByJudgementQuery = new VotesByJudgementQuery();
+  const chart = await votesByJudgementQuery.execute(query);
+
+  res.render("local-estado", { 
+    chartTitle: 'Acórdãos / país',
     chart: JSON.stringify(chart),
   });
 });
