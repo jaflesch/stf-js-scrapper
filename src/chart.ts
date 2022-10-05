@@ -15,6 +15,7 @@ import {
   JudgementsByDocumentCategoryCountQuery,
   JudgementsByDecisionTypeQuery,
   JudgementsByDecisionDelayedQuery,
+  VotesByMinisterQuery,
 } from './visualization/query';
 import { removeStopwords, porBr } from 'stopword';
 import { DocumentCategory } from "./visualization/infra/document-category.enum";
@@ -195,15 +196,12 @@ router.get('/decisao-adiamento', async({ query}: Request, res: Response) => {
   });
 });
 
-router.get('/decisao-adiamento-ano', async({ query}: Request, res: Response) => {
-  const judgementsByDecisonDelayedQuery = new JudgementsByDecisionDelayedQuery();
-  const chart = await judgementsByDecisonDelayedQuery.execute({
-    ...query,
-    groupByYear: true,
-  });
+router.get('/votos-ministro', async({ query}: Request, res: Response) => {
+  const votesByMinistersQuery = new VotesByMinisterQuery();
+  const chart = await votesByMinistersQuery.execute(query);
 
-  res.render("decisao-adiamento-ano", { 
-    chartTitle: 'Decisão adiada / ano',
+  res.render("votos-ministro", { 
+    chartTitle: 'Votos / ministro',
     chart: JSON.stringify(chart),
   });
 });

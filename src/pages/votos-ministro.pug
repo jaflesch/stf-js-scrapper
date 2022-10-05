@@ -1,0 +1,125 @@
+extends templates/layout
+
+block variables 
+  - var page_title = 'Votos por ministro';
+
+append title 
+    title= page_title
+
+block chart 
+  div(style="width:80%; height:auto;")
+    canvas#myChart 
+    div 
+      p#chart
+  
+  script.
+    $(document).ready(() => {
+      const queryName = location.search.match(/name/)?.length;
+      Chart.register(ChartDataLabels);
+
+      //const dt = !{ chart };
+      const dt = [
+        { name: 'GILMAR MENDES', count: 101 },
+        { name: 'DIAS TOFFOLI', count: 130 },
+        { name: 'RICARDO LEWANDOWSKI', count: 142 },
+        { name: 'CARMEN LÚCIA', count: 168 },
+        { name: 'ALEXANDRE DE MORAES', count: 107 },
+        { name: 'GILMAR MENDES', count: 101 },
+        { name: 'DIAS TOFFOLI', count: 130 },
+        { name: 'RICARDO LEWANDOWSKI', count: 142 },
+        { name: 'CARMEN LÚCIA', count: 168 },
+        { name: 'ALEXANDRE DE MORAES', count: 107 },
+        { name: 'GILMAR MENDES', count: 101 },
+        { name: 'DIAS TOFFOLI', count: 130 },
+        { name: 'RICARDO LEWANDOWSKI', count: 142 },
+        { name: 'CARMEN LÚCIA', count: 168 },
+        { name: 'ALEXANDRE DE MORAES', count: 107 },
+        { name: 'GILMAR MENDES', count: 101 },
+        { name: 'DIAS TOFFOLI', count: 130 },
+        { name: 'RICARDO LEWANDOWSKI', count: 142 },
+        { name: 'CARMEN LÚCIA', count: 168 },
+        { name: 'ALEXANDRE DE MORAES', count: 107 },
+      ];
+
+      const labels = dt.map(d => queryName 
+        ? (
+          d.monthName 
+          ? `${d.monthName.slice(0,3)} / ${d.year}`
+          : d.year
+        ) : d.name
+      );
+
+      const data = {
+        labels,
+        datasets: [{
+          label: 'Acórdãos',
+          backgroundColor: ['#4771b5'],
+          borderColor: ['#4771b5'],
+          borderWidth: 0,
+          borderAlign: 'inner',
+          data: dt.map(d => d.count),
+          datalabels: {
+            color: '#000',
+            anchor: 'end',
+            align: 'end',
+          }
+        }]
+      };
+
+      const axisConfig = queryName ? {} : {
+        indexAxis: 'y',
+        scales: {
+          y: {
+            ticks: {
+              crossAlign: 'far',
+            }
+          }
+        },
+      }
+
+      const config = {
+        type: 'bar',
+        data: data,
+        options: {
+          ...axisConfig,
+          barPercentage: 0.8,
+          categoryPercentage: 0.8,
+          maintainAspectRatio: queryName,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            title: {
+              display: queryName,
+              text: new URLSearchParams(location.search).get('name'),
+            },
+          },
+          scales: {
+            x: {
+              grid: {
+                color: '#f0f0f0',
+                borderColor: 'gray',
+                tickColor: 'gray',
+              }
+            },
+            y: {
+              grid: {
+                color: '#e0e0e0',
+                borderColor: 'gray',
+                tickColor: 'gray',
+              }
+            }
+          }
+        },
+        tooltips: {
+          enabled: false
+        },
+      };
+
+      $('#myChart').parent().attr('style', queryName ? "width:90%; height:auto;" : "width:100%;height:100vh");
+
+      const myChart = new Chart(
+        $('#myChart'), config
+      );  
+    })
+    

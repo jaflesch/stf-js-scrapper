@@ -21,11 +21,15 @@ block chart
             
           div.col-auto 
             button(class="btn btn-primary") Pesquisar
+    
     hr(style="width:100%; border-color:#aaa;")
+    
     div(style=(Number(limit) > 0 ? "width:75%;" : "height:150vh;width:100%"))
       canvas#myChart 
+    
     div
       div#chart-labels(style='display:none; padding: 8px; border:1px solid #ddd;')
+  
   script.
     $(document).ready(() => {
       const urlParams = new URLSearchParams(location.search);
