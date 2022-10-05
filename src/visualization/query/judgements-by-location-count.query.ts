@@ -2,38 +2,38 @@ import { PipelineStage } from "mongoose";
 import { Query } from "../domain/query";
 import { Judgement } from "../../models/judgement.model";
 import { QueryBuilder } from "../../query-builder";
+import { BrazilFederationsMongoList } from "../infra/brazil-federations-mongo-list";
+import { MongoDBPipeline } from "../infra/mongodb-pipeline.type";
+import { getGeoChartBRCode } from "../infra/get-geochart-br-code";
 
 type Params = {
-  limit?: number;
+  startAt?: Date;
+  endAt?: Date;
+  country?: string;
 }
 
-type ResultDTO = {
-  total: number;
-  items: Array<{
-    count: number;
-    location: string;
-  }>
-}
+type ResultDTO = Array<{
+  count: number;
+  location: any;
+}>;
 
-export class JudgementsByLocationCountQuery implements Query <Params, ResultDTO> {
-  public async execute({ limit }: Params): Promise<ResultDTO> {
-    const qb = new QueryBuilder(Judgement).$();    
+export class JudgementsByLocationCountQuery implements Query<Params, ResultDTO> {
+  public async execute(queryParams: Params): Promise<ResultDTO> {
+    const qb = new QueryBuilder(Judgement).$();
+    const match = this.mountQueryParams(queryParams);
     
     const pipeline: PipelineStage[] = [
-      {      
-        $match: {
-          $and : [
-            { origem: { $ne : "" }},
-            { origem: { $ne : null }}
-          ]
-        }
+      {
+        $match: match
       },
       {
         $group: {
           _id: {
-            location: "$origem",
+            location: "$origem"
           },
-          count: { $sum: 1 }
+          count: {
+            $sum: 1
+          }
         }
       },      
       {
@@ -42,32 +42,50 @@ export class JudgementsByLocationCountQuery implements Query <Params, ResultDTO>
           count: "$count",
           _id: 0
         }
-      },      
+      },
       {
         $sort: {
-          count: -1,
-        },
-      },
+          count: -1
+        }
+      }    
     ];
+    const rows: ResultDTO = await qb.aggregate(pipeline);
 
-    if (limit && limit > 0) {
-      pipeline.push({
-        $limit: Number(limit)
-      })
-    }
+    return rows.map(row => ({
+      count: row.count,
+      location: getGeoChartBRCode(row.location),
+    }));   
+  }
 
-    const items = await qb.aggregate(pipeline);
-    let total = 0;
+  private mountQueryParams (queryParams: Params): MongoDBPipeline {
+    const match: MongoDBPipeline['match'] = {};
+    
+    const yearMatch = [];
 
-    if (limit) {
-      pipeline.pop();
-      pipeline.push({
-        $skip: Number(limit)
+    if (queryParams.startAt) {
+      yearMatch.push({ 
+        year: { 
+          $gte: Number(queryParams.startAt) 
+        } 
       });
-      const all = await qb.aggregate(pipeline);
-      total = all.reduce((partialSum, a) => partialSum + a.count, 0);
+    }
+    if (queryParams.endAt) {
+      yearMatch.push({
+        year: {
+          $lte: Number(queryParams.endAt)
+        }
+      });
+    }
+    if (queryParams.country) {
+      match.origem = {
+        $in : BrazilFederationsMongoList,
+      }
+    }    
+    
+    if (yearMatch.length > 0) {
+      match.$and = yearMatch;
     }
 
-    return { items, total }
+    return match;
   }
 }
