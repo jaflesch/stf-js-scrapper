@@ -1,0 +1,57 @@
+extends templates/layout
+
+block variables 
+  - var page_title = 'Órgão julgador por ano';
+  
+append head_scripts
+  script(type="text/javascript", src="https://www.gstatic.com/charts/loader.js")
+
+append title 
+  title= (page_title || 'LEAF | UFRGS 2022')
+
+block chart 
+  div#regions_div(style="width: 90%; height: 75vh;")
+	
+  script.
+    $(document).ready(() => {
+      const chartData = !{ chart };
+        console.log(chartData);
+
+      google.charts.load('current', {
+        'packages':['geochart'],
+        'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
+      });
+      google.charts.setOnLoadCallback(drawRegionsMap);
+
+      function drawRegionsMap() {
+        
+        var data = google.visualization.arrayToDataTable([
+          ['País', 'Acórdãos'],
+          ...chartData.map(cd => ([
+            cd.location, cd.count
+          ]))
+        ]);
+
+        var options = {
+          region: 'BR',
+          resolution: 'provinces',
+          legend: {
+            textStyle: {
+              color: 'black', 
+              fontSize: 14
+            }
+          },
+          magnifyingGlass: {enable: true, zoomFactor: 7.5},
+          geochartVersion: 11,
+          colorAxis: {
+            minValue: 0,  
+            colors: ['#ece5d9','#caef90', '#dac73e', '#ff5858']
+          }          
+        };
+
+        var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+
+        chart.draw(data, options);
+      }
+    });
+    
