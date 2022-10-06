@@ -1,41 +1,77 @@
 extends templates/layout
 
 block variables 
-  - var page_title = 'Órgão julgador por ano';
+  - var page_title = 'Acórdãos / país';
   
 append head_scripts
   script(type="text/javascript", src="https://www.gstatic.com/charts/loader.js")
 
 append title 
-  title= (page_title || 'LEAF | UFRGS 2022')
+  title= page_title
 
 block chart 
-  div#regions_div(style="width: 90%; height: 75vh;")
+  div#regions_div(style="width: 100%; height: 700px;")
 	
   script.
     $(document).ready(() => {
+      const chartData = !{ chart };
+
+      const maxValue = Math.max(...chartData.map(cd => cd.count));
+      const normalizedChartData = chartData.map(cd => ({
+        ...cd,
+        normalizedCount: Math.log10(cd.count)
+      }));
+      const minNormalizedValue = Math.min(...normalizedChartData.map(c => c.normalizedCount));
+
       google.charts.load('current', {
         'packages':['geochart'],
         'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
       });
-      google.charts.setOnLoadCallback(drawRegionsMap);
 
-      function drawRegionsMap() {
-        var data = google.visualization.arrayToDataTable([
-          ['País', 'Acórdãos'],
-          ['Germany', 200],
-          ['United States', 300],
-          ['Brazil', 400],
-          ['Canada', 500],
-          ['France', 600],
-          ['RU', 700]
+      google.charts.setOnLoadCallback(() => {
+        //- var data = google.visualization.arrayToDataTable([
+        //-   ['País', 'Acórdãos'],
+        //-   ['Germany', 200],
+        //-   ['United States', 300],
+        //-   ['Brazil', 400],
+        //-   ['Canada', 500],
+        //-   ['France', 600],
+        //-   ['RU', 700]
+        //- ]);
+
+        const data = google.visualization.arrayToDataTable([
+          ['Federação', 'Acórdãos'],
+          ...normalizedChartData.map(cd => ([
+            {
+              v: cd.location,
+              f: cd.locationText,
+            },
+            {
+              v: cd.normalizedCount,
+              f: Number(cd.count).toLocaleString()
+            }
+          ]))
         ]);
 
-        var options = {};
+        const options = {
+          legend: {
+            textStyle: {
+              color: 'transparent', 
+              fontSize: 14
+            }
+          },
+          geochartVersion: 10,
+          colorAxis: {
+            minValue: minNormalizedValue,  
+            colors: ['#ece5d9','#caef90', '#dac73e', '#ff5858']
+          },          
+          backgroundColor: {
+            fill: '#9cc0f9',
+          }
+        };
 
-        var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
-
+        const chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
         chart.draw(data, options);
-      }
+      });
     });
     

@@ -224,8 +224,8 @@ router.get('/local-federacao', async({ query }: Request, res: Response) => {
 });
 
 router.get('/local-estado', async({ query }: Request, res: Response) => {
-  const votesByJudgementQuery = new VotesByJudgementQuery();
-  const chart = await votesByJudgementQuery.execute(query);
+  const judgementsByLocationCountQuery = new JudgementsByLocationCountQuery();
+  const chart = await judgementsByLocationCountQuery.execute(query);
 
   res.render("local-estado", { 
     chartTitle: 'Acórdãos / país',
