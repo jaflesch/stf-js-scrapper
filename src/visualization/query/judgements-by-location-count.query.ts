@@ -4,7 +4,7 @@ import { Judgement } from "../../models/judgement.model";
 import { QueryBuilder } from "../../query-builder";
 import { BrazilFederationsMongoList } from "../infra/brazil-federations-mongo-list";
 import { MongoDBPipeline } from "../infra/mongodb-pipeline.type";
-import { getGeoChartBRCode } from "../infra/get-geochart-br-code";
+import { getGeoChartBRCode, getGeoChartBRLabel } from "../infra/geochart-utils";
 
 type Params = {
   startAt?: Date;
@@ -15,6 +15,7 @@ type Params = {
 type ResultDTO = Array<{
   count: number;
   location: any;
+  locationText: string;
 }>;
 
 export class JudgementsByLocationCountQuery implements Query<Params, ResultDTO> {
@@ -54,6 +55,7 @@ export class JudgementsByLocationCountQuery implements Query<Params, ResultDTO> 
     return rows.map(row => ({
       count: row.count,
       location: getGeoChartBRCode(row.location),
+      locationText: getGeoChartBRLabel(row.location),
     }));   
   }
 

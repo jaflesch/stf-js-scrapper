@@ -10,48 +10,60 @@ append title
   title= (page_title || 'LEAF | UFRGS 2022')
 
 block chart 
-  div#regions_div(style="width: 90%; height: 75vh;")
+  div#regions_div(style="width: 100%; height: 700px;")
 	
   script.
     $(document).ready(() => {
       const chartData = !{ chart };
-        console.log(chartData);
+
+      const maxValue = Math.max(...chartData.map(cd => cd.count));
+      const normalizedChartData = chartData.map(cd => ({
+        ...cd,
+        normalizedCount: Math.log(cd.count) / Math.log(100) + (cd.count / maxValue / 2)
+      }));
+      const minNormalizedValue = Math.min(...normalizedChartData.map(c => c.normalizedCount));
 
       google.charts.load('current', {
         'packages':['geochart'],
         'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
       });
-      google.charts.setOnLoadCallback(drawRegionsMap);
 
-      function drawRegionsMap() {
-        
-        var data = google.visualization.arrayToDataTable([
-          ['País', 'Acórdãos'],
-          ...chartData.map(cd => ([
-            cd.location, cd.count
+      google.charts.setOnLoadCallback(() => {
+        const data = google.visualization.arrayToDataTable([
+          ['Federação', 'Acórdãos'],
+          ...normalizedChartData.map(cd => ([
+            {
+              v: cd.location,
+              f: cd.locationText,
+            },
+            {
+              v: cd.normalizedCount,
+              f: Number(cd.count).toLocaleString()
+            }
           ]))
         ]);
 
-        var options = {
+        const options = {
           region: 'BR',
           resolution: 'provinces',
           legend: {
             textStyle: {
-              color: 'black', 
+              color: 'transparent', 
               fontSize: 14
             }
           },
-          magnifyingGlass: {enable: true, zoomFactor: 7.5},
-          geochartVersion: 11,
+          geochartVersion: 10,
           colorAxis: {
-            minValue: 0,  
+            minValue: minNormalizedValue,  
             colors: ['#ece5d9','#caef90', '#dac73e', '#ff5858']
-          }          
+          },          
+          backgroundColor: {
+            fill: '#9cc0f9',
+          }
         };
 
-        var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
-
+        const chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
         chart.draw(data, options);
-      }
+      });
     });
     

@@ -30,5 +30,9 @@ enum MapProvinceToGeChartCode {
 
 export const getGeoChartBRCode = (brProvince: keyof typeof MapProvinceToGeChartCode) => {
   return MapProvinceToGeChartCode[brProvince] || '';
+}
 
+export const getGeoChartBRLabel = (brProvince: string) => {
+  const values = brProvince.split(' - ');
+  return values.length === 2 ? values[1] : values[0];
 }
