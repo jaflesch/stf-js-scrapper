@@ -10,6 +10,7 @@ export type CLIArgs = {
 	s: string;
 	m: boolean;
 	p: boolean;
+	di: string;
 	limit: number;
 	offset: number;
 	rows: number;
@@ -18,6 +19,7 @@ export type CLIArgs = {
 	sort: string;
 	minify: boolean;
 	paginate: boolean;
+	dateInterval: string;
 }
 
 export const args = yargs(process.argv.slice(2))
@@ -43,26 +45,26 @@ export const args = yargs(process.argv.slice(2))
 			describe: colors.blue('Resultados por página'),
 			type: 'number'
 		},
+		'i': {
+			alias: 'dateInterval',
+			demandOption: false,
+			default: '',
+			describe: colors.blue('Período dos julgamentos <ddmmyyyy-ddmmyyyy>'),
+			type: 'string'
+		},
+		's': {
+			alias: 'sort',
+			demandOption: false,
+			default: 'date,desc',
+			describe: colors.blue('Ordenação dos resultados. Segue o formato <(date|score)-(asc|desc)>'),
+			type: 'string'
+		},
 		'd': {
 			alias: 'debug',
 			demandOption: false,
 			default: false,
 			describe: colors.blue('Log de eventos'),
 			type: 'boolean'
-		},
-		'a': {
-			alias: 'async',
-			demandOption: false,
-			default: false,
-			describe: colors.blue('Fazer download assíncronos'),
-			type: 'boolean'
-		},
-		's': {
-			alias: 'sort',
-			demandOption: false,
-			default: 'date,desc',
-			describe: colors.blue('Ordenação dos resultados. Segue o formato <(date|score),(asc|desc)>'),
-			type: 'string'
 		},
 		'm': {
 			alias: 'minify',
@@ -78,7 +80,5 @@ export const args = yargs(process.argv.slice(2))
 			describe: colors.blue('Salva cada página em um JSON'),
 			type: 'boolean'
 		},
-		
-
 	})
 	.argv;

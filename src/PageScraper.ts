@@ -2,6 +2,7 @@ const colors = require('colors');
 import { Browser, Page } from 'puppeteer';
 import { utils } from './utils';
 import { CLIArgs } from './args';
+import { isValid } from 'date-fns';
 
 export type Judgment = {
 	id: string;
@@ -43,6 +44,7 @@ export class PageScraper {
 	private page: number;
 	private order: string;
 	private orderBy: string;
+	private dateInterval: string;
 	private url = '';
 	private mainFrameDOM = '.result-container.jud-text.p-15.ng-star-inserted';
 
@@ -60,6 +62,10 @@ export class PageScraper {
 		const { order, orderBy } = this.parseSort(_options.s);
 		this.order = order;
 		this.orderBy = orderBy;
+
+		this.validateDateInterval(_options.dateInterval);
+		this.dateInterval = _options.dateInterval;
+		
 		this.parseURLParams();
 	}
 
@@ -72,12 +78,42 @@ export class PageScraper {
 		}
 	}
 
+	private validateDateInterval(dateInterval: string) {
+		if (dateInterval === '') {
+			return;
+		} else if (
+			dateInterval.length < 17 ||
+			dateInterval.match(/^[0-9]{8}-[0-9]{8}$/) === null
+		) {
+			throw new Error('Invalid date format'.red);
+		} else {
+			const startDate = new Date(
+				`${dateInterval.substring(0, 2)}-${dateInterval.substring(2, 4)}-${dateInterval.substring(4, 8)}`
+			);
+			const endDate = new Date(
+				`${dateInterval.substring(9, 11)}-${dateInterval.substring(11, 13)}-${dateInterval.substring(13, 17)}`
+			);
+
+			if (! isValid(startDate)) {
+				throw new Error('Invalid interval start date'.red);
+			}
+			if (! isValid(endDate)) {
+				throw new Error('Invalid interval end date'.red);
+			}			
+		}
+	}
+
 	private parseURLParams () {
 		let baseUrl = 'https://jurisprudencia.stf.jus.br/pages/search?base=acordaos&sinonimo=true&plural=true&queryString=a';
+		//baseUrl += '&julgamento_data=01062020-01062021';
 		baseUrl += `&page=${this.page}`;
 		baseUrl += `&pageSize=${this.rowsPerPage}`;
 		baseUrl += `&sort=${this.order}`;
 		baseUrl += `&sortBy=${this.orderBy}`;
+		
+		if (this.dateInterval) {
+			baseUrl += `&julgamento_data=${this.dateInterval}`;
+		}
 
 		this.url = baseUrl;
 	}
@@ -99,6 +135,7 @@ export class PageScraper {
 	private async execute () {
 		let results: ScrapedData = [];
 		try {
+			
 			this.debug && console.warn(`Starting process`.blue);
 			const page = await this.browserInstace.newPage();
 			await page.goto(this.url);
@@ -113,12 +150,13 @@ export class PageScraper {
 			} 
 			totalPages += this.offset;
 			
-			this.debug && console.warn(`${totalPages} pages to scrap data [${this.offset}-${totalPages}]...`.blue);
+			this.debug && console.warn(`${this.limit} pages to scrap data [${this.page}-${totalPages}]...`.blue);
 	
 			for(let index = this.offset; index < totalPages; index++) {
 				const startAt = +new Date();
 				await page.waitForTimeout(1000);				
 				const currentPage = await this.scrapCurrentPage(page, index);
+				await page.waitForNavigation();
 				const endAt = +new Date();
 				
 				results = results.concat({
@@ -145,7 +183,7 @@ export class PageScraper {
 	}
 
 	private async scrapCurrentPage (page: Page, row: number) {
-		this.debug && console.warn(`Scraping data from page [${row}]'...`.blue);
+		this.debug && console.warn(`Scraping data from page [${row + 1}]: ${page.url()}`.blue);
 
 		let pageData: Judgment[] = await page.$$eval(this.mainFrameDOM, async (sections: Element[]) => {
 			return sections.map((section) => {
@@ -181,7 +219,7 @@ export class PageScraper {
 				for (let j = 0; j < occurrences.length; j++) {
 					const key = (occurrences[j].children[0] as HTMLDivElement).innerText;
 					const value = (occurrences[j].children[1] as HTMLDivElement).innerText;
-					const normalizedKey = key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+					const normalizedKey = key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 					ocorrencias.push({
 						[normalizedKey]: value
 					});
@@ -213,10 +251,12 @@ export class PageScraper {
 		
 		// Obter link do PDF:
 		for (let i = 0; i < pageData.length; i++) {
-			this.debug && console.log(`\n[${row}:${`${i + 1}] Navigating to`.yellow}: ${pageData[i].dadosCompletos}`);				
+			this.debug && console.log(`\n[${row + 1}:${`${i + 1}] Navigating to`.yellow}: ${pageData[i].dadosCompletos}`);				
 			
 			await page.goto(pageData[i].dadosCompletos);
-			await page.waitForSelector('.header-icons.hide-in-print mat-icon');	
+			await page.waitForNavigation();
+			await page.waitForTimeout(500);
+			await page.waitForSelector('.header-icons');	
 			
 			const iconHandler = await page.evaluateHandle(async () => {
 				const nodes = document.querySelectorAll('.header-icons.hide-in-print mat-icon');					
@@ -245,11 +285,18 @@ export class PageScraper {
 				) as HTMLDivElement).innerText;
 				const [publicacao, diario] = publicacaoRaw.split('\n');			
 				
+				let dje = '';
+				if (diario === undefined) {
+					dje = publicacao.split(' ')[0];
+				} else {
+					dje = diario.split(' ')[0];
+				}
+
 				return {			
 					titulo,
 					subtitulo,
 					publicacao,
-					dje: diario.split(' ')[0],
+					dje,
 					innerHTML
 				}
 			});
