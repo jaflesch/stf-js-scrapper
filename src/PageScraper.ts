@@ -4,33 +4,18 @@ import { utils } from './utils';
 import { CLIArgs } from './args';
 import { isValid } from 'date-fns';
 
-export type Judgment = {
+export type JudgmentScrap = {
 	id: string;
-	titulo: string;
-	orgao: string;
-	relator: string;
-	redator?: string | undefined; 
-	dataJulgamento: string; 
-	dataPublicacao: string,
-	ocorrencias: Array<
-		{[x: string]: string
-	}>;
-	dadosCompletos: string;
-	innerHTML: string | undefined;
-	pdfFileUrl: string | null;
 	docId: string | null;
-	innerPage: {
-		dje: string;
-		titulo: string;
-		subtitulo: string;
-		publicacao: string;
-		innerHTML: string | undefined;
-	}
+	innerHTML: string | undefined;
+	innerPageHTML: string | undefined;
+	pdfFileUrl: string | null;
+	innerPageUrl: string;
 }
 
 export type ScrapedData = Array<{
 	page: number;
-	data: Judgment[];
+	data: JudgmentScrap[];
 	startAt: number;
 	endAt: number;
 	options: CLIArgs;
@@ -179,81 +164,37 @@ export class PageScraper {
 			this.debug && console.log(`Error: ${err}`.red);
 			return results;
 		}
-
 	}
 
 	private async scrapCurrentPage (page: Page, row: number) {
 		this.debug && console.warn(`Scraping data from page [${row + 1}]: ${page.url()}`.blue);
 
-		let pageData: Judgment[] = await page.$$eval(this.mainFrameDOM, async (sections: Element[]) => {
-			return sections.map((section) => {
+		let pageData: JudgmentScrap[] = await page.$$eval(this.mainFrameDOM, async (sections: Element[]) => {
+			return sections.map((section): JudgmentScrap => {
 				const { id } = section;
 				const sectionDOM = `.result-container.jud-text.p-15.ng-star-inserted#${id}`;
 				const innerHTML = document.querySelector(sectionDOM)?.innerHTML;
 
 				// Título
 				const link = document.querySelector(`${sectionDOM} > a`) as HTMLAnchorElement;
-				const titulo = link?.innerText.trim();
-				const dadosCompletos = link?.href.trim();
-
-				// Cabeçalho
-				const header = document.querySelector(`${sectionDOM} #result-principal-header`) as HTMLDivElement;
-				const headerInfo = header.innerText.split('\n');
-				
-				const orgao = headerInfo[0]?.split(': ')[1];
-				const relator = headerInfo[1]?.split(': ')[1];
-				let redator, dataJulgamento, dataPublicacao;
-
-				if (headerInfo.length > 4) {
-					redator = headerInfo[2]?.split(': ')[1];
-					dataJulgamento = headerInfo[3]?.split(': ')[1];
-					dataPublicacao = headerInfo[4]?.split(': ')[1];
-				} else {
-					dataJulgamento = headerInfo[2]?.split(': ')[1];
-					dataPublicacao = headerInfo[3]?.split(': ')[1];
-				}
-				
-				// Ocorrências
-				const ocorrencias = [];
-				const occurrences = document.querySelectorAll(`${sectionDOM} #other-occurrences > div > div`) as NodeListOf<HTMLDivElement>;
-				for (let j = 0; j < occurrences.length; j++) {
-					const key = (occurrences[j].children[0] as HTMLDivElement).innerText;
-					const value = (occurrences[j].children[1] as HTMLDivElement).innerText;
-					const normalizedKey = key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-					ocorrencias.push({
-						[normalizedKey]: value
-					});
-				}
+				const innerPageUrl = link?.href.trim();
 				
 				return {
-					id: dadosCompletos.split('/search/')[1]?.split('/')[0],
-					titulo,
-					orgao,
-					relator,
-					redator, 
-					dataJulgamento, 
-					dataPublicacao,
-					ocorrencias,
-					dadosCompletos,
-					innerHTML,
-					pdfFileUrl: '',
+					id: innerPageUrl.split('/search/')[1]?.split('/')[0],
 					docId: null,
-					innerPage: {
-						dje: '',
-						titulo: '',
-						subtitulo: '',
-						publicacao: '',
-						innerHTML: '',
-					}
+					innerPageUrl,
+					pdfFileUrl: '',
+					innerHTML,
+					innerPageHTML: '',
 				}
 			});
 		});
 		
-		// Obter link do PDF:
+		// Get PDF URL
 		for (let i = 0; i < pageData.length; i++) {
-			this.debug && console.log(`\n[${row + 1}:${`${i + 1}] Navigating to`.yellow}: ${pageData[i].dadosCompletos}`);				
+			this.debug && console.log(`\n[${row + 1}:${`${i + 1}] Navigating to`.yellow}: ${pageData[i].innerPageUrl}`);				
 			
-			await page.goto(pageData[i].dadosCompletos);
+			await page.goto(pageData[i].innerPageUrl);
 			await page.waitForNavigation();
 			await page.waitForTimeout(500);
 			await page.waitForSelector('.header-icons');	
@@ -269,36 +210,9 @@ export class PageScraper {
 
 			const innerPageData = await page.evaluate(async () => {
 				const baseDOM = '.cp-content.display-in-print.ng-star-inserted';
-				const baseHeaderDOM = `${baseDOM} > div > div`;
+				const innerHTML = document.querySelector(baseDOM)?.innerHTML ?? '';
 				
-				const innerHTML = document.querySelector(baseDOM)?.innerHTML;
-				const titulo = (
-					document.querySelector(`${baseHeaderDOM} > h4:first-child`
-				) as HTMLHeadingElement).innerText;
-
-				const subtitulo = (
-					document.querySelector(`${baseHeaderDOM} > h4:nth-child(2)`
-				) as HTMLHeadingElement).innerText;
-				
-				const publicacaoRaw = (
-					document.querySelector(`${baseDOM} > div:nth-child(3) > div`
-				) as HTMLDivElement).innerText;
-				const [publicacao, diario] = publicacaoRaw.split('\n');			
-				
-				let dje = '';
-				if (diario === undefined) {
-					dje = publicacao.split(' ')[0];
-				} else {
-					dje = diario.split(' ')[0];
-				}
-
-				return {			
-					titulo,
-					subtitulo,
-					publicacao,
-					dje,
-					innerHTML
-				}
+				return { innerHTML }
 			});
 
 			this.debug && console.warn('Opening new window with pdf file...'.blue);	
@@ -306,7 +220,7 @@ export class PageScraper {
 			
 			this.debug && console.warn(`${'URL found:'.green} ${pdfFileUrl}`);	
 			pageData[i].pdfFileUrl = pdfFileUrl;
-			pageData[i].innerPage = innerPageData;
+			pageData[i].innerPageHTML = innerPageData.innerHTML;
 			pageData[i].docId = utils.getDocIdFromPdfUrl(pdfFileUrl);
 
 			await page.goBack();
