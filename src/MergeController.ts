@@ -6,12 +6,14 @@ type MergeControllerParams = {
   target?: string,
   basePath?: string;
   paginated?: boolean,
+  filterKeys?: string[],
 }
 
 export class MergeController {
   private paginated = false;
   private content: object[] = [];
   private folderPath: string[] = [];
+  private filterKeys: string[] = [];
   private filefolders = ['../json'];
   private destinationFolder = path.join(__dirname, '../db');
 
@@ -27,6 +29,10 @@ export class MergeController {
 
     if (options?.target) {
       this.destinationFolder = path.join(__dirname, options.target);
+    }
+
+    if(options?.filterKeys) {
+      this.filterKeys = options.filterKeys;
     }
 
     this.paginated = options?.paginated ?? true;
@@ -99,7 +105,23 @@ export class MergeController {
     folders.map((folder: number) => {
       const jsonFile = fs.readdirSync(`${this.folderPath[index]}/${folder}`)[0];
       const data = fs.readFileSync(`${this.folderPath[index]}/${folder}/${jsonFile}`);
-      mergedJson = mergedJson.concat(...JSON.parse(data));
+      const judgements = JSON.parse(data);
+      const filteredJson = [];
+      
+      for (const d of judgements) {
+        if (this.filterKeys.length === 0) {
+          filteredJson.push(d);
+        } else {
+          const obj: {[key: string]: any} = {};
+          for (let i = 0; i < this.filterKeys.length; i++) {
+            if (d[this.filterKeys[i]] !== undefined) {
+              obj[this.filterKeys[i]] = d[this.filterKeys[i]];
+            }
+          }
+          filteredJson.push(obj);
+        }
+      }
+      mergedJson = mergedJson.concat(...filteredJson);
     });
 
     return mergedJson;
