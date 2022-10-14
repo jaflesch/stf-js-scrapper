@@ -11,7 +11,6 @@ async function getUrls () {
 				id: 1, 
 				_id: 0,
 				arquivoPdfUrl: 1, 
-				documentId: 1,
 		});
 		
 		//console.log(r)
@@ -24,8 +23,8 @@ async function getUrls () {
 async function download (urls) {
 	try {
 		const pd  = await pdfDownloader.start(urls);	
-		pdfDownloader.createLog(pd);
-		console.log(`${pd}`.magenta);
+		//pdfDownloader.createLog(pd);
+		console.log(`${JSON.stringify(pd)}`.magenta);
 		
 	} catch(err) {
 		console.error(`An error occurred when downloading pdf files: ${err.message}`.red);

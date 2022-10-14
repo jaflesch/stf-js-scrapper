@@ -1,6 +1,6 @@
 const { DownloaderHelper } = require('node-downloader-helper');
 const colors = require('colors');
-import { existsSync, mkdirSync, writeFile } from 'fs';
+import { existsSync, mkdirSync, writeFile, readdirSync, createWriteStream } from 'fs';
 import path from 'path';
 
 const pdfDownloader = {
@@ -10,42 +10,63 @@ const pdfDownloader = {
 
 		const responses = [];
 		const destinationFolder = path.join(__dirname, destFolder);	
+		const logStream = createWriteStream(path.join(destinationFolder, 'log.txt'), {flags: 'a'});
 		let currentUrl = '', fileName = '', status = 0;
-		
-		try {
 
+		const filesMap = new Set([
+			...readdirSync(destinationFolder)
+		]);
+		
+		const filteredUrls = [];
+		for (let i = 0; i < urls.length; i++) {
+			fileName = urls[i].split('&docID=')[1] + '.pdf';
+			if (! filesMap.has(fileName)) {
+				filteredUrls.push(urls[i]);
+			}
+		}
+
+		try {
 			if (! existsSync(destinationFolder)) {
 				mkdirSync(destinationFolder);
-			}
-
-			for (let i = 0; i < urls.length; i++) {
-				currentUrl = urls[i];
-				console.warn(`[${i + 1}] Downloading file from: ${urls[i]} ...`.yellow);
+			}		
+			
+			for (let i = 0; i < filteredUrls.length; i++) {
+				currentUrl = filteredUrls[i];
+				console.warn(`[${i + 1}] Downloading file from: ${filteredUrls[i]} ...`.yellow);
 				fileName = currentUrl.split('&docID=')[1] + '.pdf';
 							
 				const download = new DownloaderHelper(
-					urls[i], 
+					filteredUrls[i], 
 					destinationFolder, 
 					{ fileName }
 				);					
 				download.on('end', () => console.log('Download completed!\n'.green))
 				download.on('error', (err) => console.log('Download failed: '.red, err.status));
 				
-				let status = 0;
+				let status = 0, size = 0;
 				try {
 					await download.start();
 				} catch (err) {
-					status = err.status;
+					status = err.status ?? 500;
 				}
-
+				
+				if (status === 0) {
+					const totalSize = await download.getTotalSize();
+					size = totalSize.total;
+				}
+				
 				responses.push({
+					pdfUrl: filteredUrls[i],
 					fileName,
-					size: status ? download.getTotalSize() : 0,
+					size,
 					error: status,
 				});
+				logStream.write(`${status}\t${filteredUrls[i]}\t${size}\n`)
 			}
 		}	catch (err) {
 			console.log('@@@@@', err);
+		} finally {
+			logStream.end();
 		}
 		
 		writeFile(
