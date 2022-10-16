@@ -14,7 +14,9 @@ const walkParent = (givenPath: string, steps: number): string => {
 }
 
 (async function () {
-  let dstPath = path.join(walkParent(__dirname, 3), `${path.sep}data${path.sep}pdf-url`);
+  let dstPath = path.join(
+    walkParent(__dirname, 3), 'data', 'pdf-url'
+  );
   let fileName = 'urls.txt';
   if (args.output) {
     fileName = path.parse(args.output).base;
