@@ -8,6 +8,10 @@
     "dev": "nodemon",
     "pdf": "nodemon pdf.js --ignore *.json",
     "scrap": "ts-node ./src/index.ts --limit=100",
+    "st": "ts-node ./src/index.ts --",
+    "pdf2text": "ts-node ./src/pdf2text.ts --src=a --dest=b",
+    "pdflist": "ts-node ./src/pdf-to-text/infra/pdflist.ts --src=a --dest=b",
+    "words": "ts-node ./src/words.ts",
     "merge": "ts-node ./src/merge.ts",
     "db": "ts-node ./src/mongo.ts",
     "chart": "ts-node ./src/chart.ts",
@@ -24,6 +28,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@pdftron/pdfnet-node": "^9.3.0",
     "@types/axios": "^0.14.0",
     "@types/chart.js": "^2.9.37",
     "@types/colors": "^1.2.1",
@@ -33,6 +38,7 @@
     "@types/mongoose": "^5.11.97",
     "@types/node-downloader-helper": "^1.0.16",
     "@types/puppeteer": "^5.4.6",
+    "@types/stopword": "^2.0.0",
     "@types/yargs": "^17.0.11",
     "axios": "^0.27.2",
     "chart.js": "^3.9.1",
@@ -45,13 +51,18 @@
     "mongoose": "^6.5.2",
     "node-downloader-helper": "^2.1.1",
     "nodemon": "^2.0.19",
+    "pdf-parse": "^1.1.1",
+    "pdf2html": "^2.6.7",
     "pug": "^3.0.2",
     "puppeteer": "^15.5.0",
+    "remove-stopwords": "^1.0.3",
+    "stopword": "^2.0.5",
     "ts-node": "^10.9.1",
     "yargs": "^17.5.1"
   },
   "devDependencies": {
     "@types/node": "^18.6.5",
+    "@types/pdf-parse": "^1.1.1",
     "typescript": "^4.7.4"
   }
 }
